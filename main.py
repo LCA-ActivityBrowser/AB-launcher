@@ -16,8 +16,14 @@ LAUNCH = os.path.join(LOCAL, "launch.py")
 # appdata dirs
 AB_DIR = appdirs.AppDirs("ActivityBrowser", "pylca").user_data_dir
 ENV_DIR = os.path.join(AB_DIR, "environment")
-PY_DIR = os.path.join(ENV_DIR, "python.exe")
 PKGS_DIR = os.path.join(AB_DIR, "pkgs")
+
+if sys.platform == "win32":
+    PY_DIR = os.path.join(ENV_DIR, "python.exe")
+elif sys.platform == "darwin":
+    PY_DIR = os.path.join(ENV_DIR, "bin", "python")
+else:
+    raise OSError
 
 os.environ["CONDA_PKGS_DIRS"] = PKGS_DIR
 os.environ["CONDA_REGISTER_ENVS"] = "false"
@@ -71,7 +77,12 @@ def download_base_env(label):
     print("Downloading base environment...")
     label.config(text="Downloading base environment...")
 
-    return os.path.join(LOCAL, "download", "environment.tar.gz")
+    if sys.platform == "win32":
+        return os.path.join(LOCAL, "download", "win-environment.tar.gz")
+    elif sys.platform == "darwin":
+        return os.path.join(LOCAL, "download", "mac-environment.tar.gz")
+    else:
+        raise OSError
 
 
 def extract_base_env(label, download):
@@ -113,6 +124,5 @@ if __name__ == "__main__":
         [PY_DIR, LAUNCH],
         stdout=sys.stdout,
         stderr=sys.stderr,
-        creationflags=subprocess.CREATE_NO_WINDOW
     )
     launcher.wait()

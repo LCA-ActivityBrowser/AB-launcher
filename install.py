@@ -1,11 +1,17 @@
 import os
+import sys
 from conda.cli import main
 
 LOCAL = os.path.split(__file__)[0]
 
 def download_env_spec():
     print("Downloading environment specification...")
-    return os.path.join(LOCAL, "download", "environment_spec.txt")
+    if sys.platform == "win32":
+        return os.path.join(LOCAL, "download", "win-environment_spec.txt")
+    elif sys.platform == "darwin":
+        return os.path.join(LOCAL, "download", "mac-environment_spec.txt")
+    else:
+        raise OSError
 
 
 if __name__ == "__main__":
