@@ -1,4 +1,5 @@
 import os
+import sys
 import tarfile
 import threading
 import subprocess
@@ -36,7 +37,12 @@ def download_base_env(label):
     print("Downloading base environment...")
     label.config(text="Downloading base environment...")
 
-    return os.path.join(LOCAL, "download", "environment.tar.gz")
+    if sys.platform == "win32":
+        return os.path.join(LOCAL, "download", "win-environment.tar.gz")
+    elif sys.platform == "darwin":
+        return os.path.join(LOCAL, "download", "mac-environment.tar.gz")
+    else:
+        raise OSError
 
 
 def extract_base_env(label, download):

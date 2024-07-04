@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sys
 from conda.cli import main
 
 ROOT = Path(__file__).parent.parent
@@ -7,7 +8,12 @@ ROOT = Path(__file__).parent.parent
 
 def download_env_spec():
     print("Downloading environment specification...")
-    return os.path.join(ROOT, "download", "environment_spec.txt")
+    if sys.platform == "win32":
+        return os.path.join(ROOT, "download", "win-environment_spec.txt")
+    elif sys.platform == "darwin":
+        return os.path.join(ROOT, "download", "mac-environment_spec.txt")
+    else:
+        raise OSError
 
 
 if __name__ == "__main__":
