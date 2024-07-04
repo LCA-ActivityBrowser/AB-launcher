@@ -1,11 +1,13 @@
 import os
+from pathlib import Path
 from conda.cli import main
 
-LOCAL = os.path.split(__file__)[0]
+ROOT = Path(__file__).parent.parent
+
 
 def download_env_spec():
     print("Downloading environment specification...")
-    return os.path.join(LOCAL, "download", "environment_spec.txt")
+    return os.path.join(ROOT, "download", "environment_spec.txt")
 
 
 if __name__ == "__main__":

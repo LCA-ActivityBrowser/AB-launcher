@@ -1,11 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+data_list = [
+    ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/download/environment.tar.gz', './ab_launcher/download/'),
+    ('./ab_launcher/download/environment_spec.txt', './ab_launcher/download/')
+]
+
 
 a = Analysis(
-    ['main.py'],
+    ['ab_launcher/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('./install.py', '.'), ('./launch.py', '.'), ('./download/environment.tar.gz', './download/'), ('./download/environment_spec.txt', './download/')],
+    datas=data_list,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -29,10 +36,19 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+)
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='Activity Browser',
 )
