@@ -7,7 +7,7 @@ import urllib.request
 from tkinter import Tk, ttk
 
 from ab_launcher import LOCAL, INSTALL
-from ab_launcher.main import ENV_DIR, PY_DIR
+from ab_launcher.main import ENV_DIR, PY_DIR, AB_DIR
 
 
 class InstallationNotifier(Tk):
@@ -38,11 +38,17 @@ class InstallationNotifier(Tk):
         extract_base_env(self.label, dl)
         install_spec_env(self.label)
 
+        # create installed file as a flag that installation was succesful
+        with open(os.path.join(AB_DIR, "installed"), "w") as file:
+            file.writelines(["Installed"])
+
         self.after(1000, self.destroy)
 
 
 def install():
-    return InstallationNotifier().mainloop()
+    InstallationNotifier().mainloop()
+
+    return
 
 
 def download_base_env(label):

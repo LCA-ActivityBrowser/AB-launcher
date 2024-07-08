@@ -22,7 +22,7 @@ def env_exists() -> bool:
         os.makedirs(AB_DIR, exist_ok=True)
         return False
 
-    if not os.path.isfile(PY_DIR):
+    if not os.path.isfile(os.path.join(AB_DIR, "installed")):
         return False
 
     return True
