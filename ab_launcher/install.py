@@ -40,6 +40,12 @@ class InstallationNotifier(Tk):
         self.progress_bar.pack(padx=10, fill="x", expand=1)
         threading.Thread(target=self.install_fn).start()
 
+    def success(self):
+        self.progress_bar.destroy()
+        self.notify("Installation successful")
+        launch_button = ttk.Button(self, text="Launch the Activity Browser", command=self.destroy)
+        launch_button.pack(pady=5)
+
     def notify(self, message):
         print(message)
         self.label.config(text=message)
@@ -70,7 +76,10 @@ class Installer:
 
     def quit(self, code):
         self.exit_code = code
-        self.notifier.after(1, self.notifier.destroy)
+        if code == 0:
+            self.notifier.success()
+        else:
+            self.notifier.notify("Installation failed")
 
     def threaded_install(self):
         try:
