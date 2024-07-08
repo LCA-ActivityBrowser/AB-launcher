@@ -32,7 +32,9 @@ def env_exists() -> bool:
 if __name__ == "__main__":
     if not env_exists():
         from ab_launcher.install import install
-        install()
+        exit_code = install()
+        if exit_code != 0:
+            sys.exit(exit_code)
 
     launcher = subprocess.Popen(
         [PY_DIR, LAUNCH],

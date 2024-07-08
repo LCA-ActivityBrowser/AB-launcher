@@ -61,23 +61,32 @@ class InstallationNotifier(Tk):
 class Installer:
 
     def __init__(self):
+        self.exit_code = 0
         self.notifier = InstallationNotifier(self.threaded_install)
 
     def start(self):
-        return self.notifier.mainloop()
+        self.notifier.mainloop()
+        return self.exit_code
+
+    def quit(self, code):
+        self.exit_code = code
+        self.notifier.after(1, self.notifier.destroy)
 
     def threaded_install(self):
-        dl = self.download_base_env()
-        self.extract_base_env(dl)
+        try:
+            dl = self.download_base_env()
+            self.extract_base_env(dl)
 
-        dl = self.download_env_spec()
-        self.install_spec_env(dl)
+            dl = self.download_env_spec()
+            self.install_spec_env(dl)
 
-        # create installed file as a flag that installation was successful
-        with open(os.path.join(AB_DIR, "installed"), "w") as file:
-            file.writelines(["Installed"])
+            # create installed file as a flag that installation was successful
+            with open(os.path.join(AB_DIR, "installed"), "w") as file:
+                file.writelines(["Installed"])
 
-        self.notifier.after(1000, self.notifier.destroy)
+            self.quit(0)
+        except:
+            self.quit(1)
 
     def download_base_env(self):
 
@@ -86,7 +95,6 @@ class Installer:
                 return
             percent = (block_num * block_size) / total_size * 100
             self.notifier.set_progress(percent)
-            print(percent)
 
         self.notifier.set_progress(0)
         self.notifier.notify("Downloading base environment...")
@@ -108,7 +116,7 @@ class Installer:
             file.extractall(ENV_DIR)
 
     def download_env_spec(self):
-        print("Downloading environment specification...")
+        self.notifier.notify("Downloading environment specification...")
         if sys.platform == "win32":
             env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/win-environment_spec.txt"
         elif sys.platform == "darwin":
@@ -132,8 +140,7 @@ class Installer:
 
         stream = ""
         line = ""
-        anchors = ["Downloading environment specification",
-                   "Collecting package metadata",
+        anchors = ["Collecting package metadata",
                    "Solving environment",
                    "Preparing transaction",
                    "Verifying transaction",
@@ -154,7 +161,10 @@ class Installer:
             if anchors and anchors[0] in stream:
                 self.notifier.notify(anchors.pop(0))
 
+        if installer.poll() != 0:
+            raise Exception("Conda install failed")
+
 
 def install():
-    Installer().start()
+    return Installer().start()
 
