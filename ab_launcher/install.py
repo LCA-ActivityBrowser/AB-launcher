@@ -3,34 +3,46 @@ import sys
 import tarfile
 import threading
 import subprocess
+import urllib.request
 from tkinter import Tk, ttk
 
 from ab_launcher import LOCAL, INSTALL
 from ab_launcher.main import ENV_DIR, PY_DIR
 
 
+class InstallationNotifier(Tk):
+    def __init__(self):
+        super().__init__()
+
+        # Set window title and size
+        self.title("Installation")
+        self.geometry("300x100")
+
+        # Make the window non-resizable
+        self.resizable(False, False)
+
+        # Create and pack the label
+        self.label = ttk.Label(self, text="You are about to install the Activity Browser.")
+        self.label.pack(pady=10)
+
+        # Create and pack the install button
+        self.install_button = ttk.Button(self, text="Install", command=self.confirmed)
+        self.install_button.pack(pady=5)
+
+    def confirmed(self):
+        self.install_button.destroy()
+        threading.Thread(target=self.in_thread).start()
+
+    def in_thread(self):
+        dl = download_base_env(self.label)
+        extract_base_env(self.label, dl)
+        install_spec_env(self.label)
+
+        self.after(1000, self.destroy)
+
+
 def install():
-    # Create the main window
-    root = Tk()
-    root.title("Installing Activity Browser")
-
-    # Create and place the label
-    label = ttk.Label(root, text="Unpacking")
-    label.pack(pady=20)
-
-    thread = threading.Thread(target=threaded_install, args=(label, root,))
-    thread.start()
-
-    # Return when the thread is finished and the mainloop is destroyed
-    return root.mainloop()
-
-
-def threaded_install(label, root):
-    dl = download_base_env(label)
-    extract_base_env(label, dl)
-    install_spec_env(label)
-
-    root.after(1000, root.destroy)
+    return InstallationNotifier().mainloop()
 
 
 def download_base_env(label):
@@ -38,7 +50,9 @@ def download_base_env(label):
     label.config(text="Downloading base environment...")
 
     if sys.platform == "win32":
-        return os.path.join(LOCAL, "download", "win-environment.tar.gz")
+        base_env_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/win-environment.tar.gz"
+        path, _ = urllib.request.urlretrieve(base_env_url)
+        return path
     elif sys.platform == "darwin":
         return os.path.join(LOCAL, "download", "mac-environment.tar.gz")
     else:
