@@ -30,16 +30,16 @@ def env_exists() -> bool:
 
 # launch as a subprocess
 if __name__ == "__main__":
+    print("AB-launcher version 0.0.0")
     if not env_exists():
+        print("Installing the Activity Browser")
         from ab_launcher.install import install
         exit_code = install()
         if exit_code != 0:
             sys.exit(exit_code)
 
+    print("Launching the Activity Browser")
     launcher = subprocess.Popen(
         [PY_DIR, LAUNCH],
-        stdout=sys.stdout,
-        stderr=sys.stderr,
-        creationflags=subprocess.CREATE_NO_WINDOW
     )
     launcher.wait()

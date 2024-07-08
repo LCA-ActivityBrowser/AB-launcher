@@ -2,7 +2,8 @@
 
 data_list = [
     ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
-    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/')
+    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
 ]
 
 
@@ -40,13 +41,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['ab_launcher\\assets\\activity-browser.ico'],
 )
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='Activity Browser',
-)
+
+

@@ -47,8 +47,9 @@ class InstallationNotifier(Tk):
         launch_button = ttk.Button(self, text="Launch the Activity Browser", command=self.destroy)
         launch_button.pack(pady=5)
 
-    def notify(self, message):
-        print(message)
+    def notify(self, message, also_print=True):
+        if also_print:
+            print(message)
         self.label.config(text=message)
 
     def undefined_progress(self):
@@ -95,8 +96,9 @@ class Installer:
                 file.writelines(["Installed"])
 
             self.quit(0)
-        except:
+        except Exception as e:
             self.quit(1)
+            raise e
 
     def download_base_env(self):
 
@@ -149,7 +151,6 @@ class Installer:
         )
 
         stream = ""
-        line = ""
         anchors = ["Collecting package metadata",
                    "Solving environment",
                    "Preparing transaction",
@@ -159,17 +160,11 @@ class Installer:
 
         while installer.poll() is None:
             char = installer.stdout.read(1)
-            line += char
+            sys.stdout.write(char)
             stream += char
-
-            if char == '' and installer.poll() is not None:
-                break
-            if char in ('\n', '\r'):
-                if line:
-                    print(line)
-                    line = ''
             if anchors and anchors[0] in stream:
-                self.notifier.notify(anchors.pop(0))
+                self.notifier.notify(anchors.pop(0), False)
+                stream = ""
 
         if installer.poll() != 0:
             raise Exception("Conda install failed")
