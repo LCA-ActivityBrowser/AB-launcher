@@ -2,9 +2,7 @@
 
 data_list = [
     ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
-    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
-    ('./ab_launcher/download/win-environment.tar.gz', './ab_launcher/download/'),
-    ('./ab_launcher/download/win-environment_spec.txt', './ab_launcher/download/')
+    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/')
 ]
 
 
