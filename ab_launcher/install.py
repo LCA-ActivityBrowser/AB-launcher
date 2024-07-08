@@ -19,6 +19,7 @@ class InstallationNotifier(Tk):
         # Set window title and size
         self.title("Installation")
         self.geometry("300x100")
+        self.iconbitmap(os.path.join(LOCAL, "assets", "activity-browser.ico"))
 
         # Make the window non-resizable
         self.resizable(False, False)
