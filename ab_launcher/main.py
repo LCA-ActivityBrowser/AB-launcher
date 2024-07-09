@@ -75,6 +75,9 @@ class Main(tk.Tk):
         launcher = Launcher(self)
         threading.Thread(target=launcher.threaded_launch).start()
 
+    def launch_done(self):
+        self.after(1000, self.destroy)
+
     def notify(self, message, also_print=True):
         if also_print:
             print(message)
