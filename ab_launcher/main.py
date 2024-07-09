@@ -3,7 +3,7 @@ from tkinter import ttk
 import os
 import threading
 
-from ab_launcher import paths
+from ab_launcher import paths, utils
 
 
 def env_exists() -> bool:
@@ -18,8 +18,8 @@ def env_exists() -> bool:
 
 
 class Main(tk.Tk):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Set window properties
         self.overrideredirect(True)
@@ -41,6 +41,13 @@ class Main(tk.Tk):
         # Create (but don't pack) the progress bar
         self.progress = tk.IntVar()
         self.progress_bar = ttk.Progressbar(self, maximum=100, variable=self.progress)
+
+        self.center_window()
+
+    def center_window(self):
+        x, y = utils.get_active_screen_center()
+        self.geometry(f'500x300+{x-250}+{y-150}')
+
 
     def mainloop(self, n=0):
         if not env_exists():
@@ -98,4 +105,5 @@ class Main(tk.Tk):
 
 
 if __name__ == "__main__":
+    print(utils.get_mouse_pos())
     Main().mainloop()
