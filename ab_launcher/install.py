@@ -3,11 +3,12 @@ import sys
 import tarfile
 import threading
 import subprocess
+import multiprocessing
 import urllib.request
 from tkinter import Tk, ttk, IntVar
 
 from ab_launcher import LOCAL, INSTALL
-from ab_launcher.main import ENV_DIR, PY_DIR, AB_DIR
+from ab_launcher.main import ENV_DIR, PY_DIR, AB_DIR, PKGS_DIR
 
 
 class InstallationNotifier(Tk):
@@ -89,6 +90,9 @@ class Installer:
             self.extract_base_env(dl)
 
             dl = self.download_env_spec()
+            missing_pkgs = self.check_downloaded_packages(dl)
+            if missing_pkgs:
+                self.download_spec_packages(missing_pkgs)
             self.install_spec_env(dl)
 
             # create installed file as a flag that installation was successful
@@ -143,9 +147,50 @@ class Installer:
 
         return txt_path
 
-    def install_spec_env(self, path):
+    def check_downloaded_packages(self, env_spec_path: str) -> list[tuple]:
+        self.notifier.notify("Checking for downloaded packages...")
+        spec_packages = []
+
+        try:
+            os.mkdir(PKGS_DIR)
+        except FileExistsError:
+            pass
+
+        with open(env_spec_path, "r") as file:
+            for line in file.readlines():
+                if line.startswith('#') or line.startswith('@'):
+                    continue
+
+                line = line.strip()
+                spec_package = line.split('/')[-1]
+                if spec_package in os.listdir(PKGS_DIR):
+                    continue
+                spec_packages.append((spec_package, line))
+
+        return spec_packages
+
+    def download_spec_packages(self, spec_packages: list[tuple]):
+        self.notifier.notify("Downloading necessary packages")
+        self.notifier.set_progress(0)
+        fin_queue = multiprocessing.Manager().Queue()
+        finished = []
+
+        with multiprocessing.Pool(os.cpu_count()) as pool:
+            mapping = [(x, y, fin_queue) for x, y in spec_packages]
+            pool.map_async(download_worker, mapping, error_callback=print)
+
+            while len(finished) < len(spec_packages):
+                percent = (len(finished) / len(spec_packages)) * 100
+                self.notifier.set_progress(percent)
+
+                finished.append(fin_queue.get())
+
+    def install_spec_env(self, env_spec_path: str):
+        self.notifier.notify("Installing packages")
+        self.notifier.undefined_progress()
+
         installer = subprocess.Popen(
-            [PY_DIR, INSTALL, path],
+            [PY_DIR, INSTALL, env_spec_path],
             stdout=subprocess.PIPE,
             text=True
         )
@@ -170,6 +215,12 @@ class Installer:
             raise Exception("Conda install failed")
 
 
+def download_worker(arg):
+    package_name, url, fin_queue = arg
+    urllib.request.urlretrieve(url, os.path.join(PKGS_DIR, package_name))
+    print(f"Downloaded {package_name}")
+    fin_queue.put(package_name)
+
+
 def install():
     return Installer().start()
-

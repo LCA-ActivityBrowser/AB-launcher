@@ -13,6 +13,7 @@ PY_DIR = os.path.join(ENV_DIR, "python.exe")
 PKGS_DIR = os.path.join(AB_DIR, "pkgs")
 
 # set conda environmental variables
+os.environ["CONDA_PREFIX"] = ENV_DIR
 os.environ["CONDA_PKGS_DIRS"] = PKGS_DIR
 os.environ["CONDA_REGISTER_ENVS"] = "false"
 
