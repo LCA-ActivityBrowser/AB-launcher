@@ -3,7 +3,7 @@ from tkinter import ttk
 import os
 import threading
 
-from ab_launcher import paths, utils
+from ab_launcher import paths, utils, widgets
 
 
 def env_exists() -> bool:
@@ -33,32 +33,30 @@ class Main(tk.Tk):
 
         # Create and pack the label
         self.label = ttk.Label(self, text="Launcher Version: 0.0.0", background="white")
-        self.label.pack(fill="x", expand=1)
+        self.label.place(x=10, y=257)
 
         # Create and pack the install button
-        self.install_button = ttk.Button(self, text="Install", command=self.install_confirmed)
+        self.install_button = ttk.Button(self, text="Install Activity Browser", command=self.install_confirmed)
 
         # Create (but don't pack) the progress bar
-        self.progress = tk.IntVar()
-        self.progress_bar = ttk.Progressbar(self, maximum=100, variable=self.progress)
+        self.progress_bar = widgets.SpecialProgressBar()
 
         self.center_window()
 
     def center_window(self):
         x, y = utils.get_active_screen_center()
-        self.geometry(f'500x300+{x-250}+{y-150}')
-
+        self.geometry(f'500x295+{x-250}+{y-150}')
 
     def mainloop(self, n=0):
         if not env_exists():
             self.install()
         else:
-            self.progress_bar.pack(fill="x", expand=1)
+            self.progress_bar.place(x=0, y=285)
             self.launch()
         super().mainloop(n)
 
     def install(self):
-        self.install_button.pack(pady=5)
+        self.install_button.place(x=350, y=250)
 
     def install_confirmed(self):
         from ab_launcher.install import Installer
@@ -66,7 +64,7 @@ class Main(tk.Tk):
         installer = Installer(self)
 
         self.install_button.destroy()
-        self.progress_bar.pack(fill="x", expand=1)
+        self.progress_bar.place(x=0, y=285)
         threading.Thread(target=installer.threaded_install).start()
 
     def install_done(self, code: int):
@@ -91,17 +89,14 @@ class Main(tk.Tk):
         self.label.config(text=message)
 
     def undefined_progress(self):
-        setattr(self.progress_bar, "undefined_progress", True)
-        self.progress_bar.config(mode="indeterminate")
-        self.progress_bar.start(5)
-        self.progress.set(0)
+        if self.progress_bar.looping:
+            return
+        self.progress_bar.looping = True
+        self.progress_bar.loop()
 
     def set_progress(self, progress: float):
-        if getattr(self.progress_bar, "undefined_progress", False):
-            setattr(self.progress_bar, "undefined_progress", False)
-            self.progress_bar.config(mode="determinate")
-            self.progress_bar.stop()
-        self.progress.set(int(progress))
+        self.progress_bar.looping = False
+        self.progress_bar.set(int(progress))
 
 
 if __name__ == "__main__":
