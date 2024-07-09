@@ -1,88 +1,17 @@
 import os
 import sys
 import tarfile
-import threading
 import subprocess
 import multiprocessing
 import urllib.request
-from tkinter import Tk, ttk, IntVar
 
-from ab_launcher import LOCAL, INSTALL
-from ab_launcher.main import ENV_DIR, PY_DIR, AB_DIR, PKGS_DIR
-
-
-class InstallationNotifier(Tk):
-    def __init__(self, install_fn):
-        super().__init__()
-
-        self.install_fn = install_fn
-
-        # Set window title and size
-        self.title("Installation")
-        self.geometry("300x100")
-        self.iconbitmap(os.path.join(LOCAL, "assets", "activity-browser.ico"))
-
-        # Make the window non-resizable
-        self.resizable(False, False)
-
-        # Create and pack the label
-        self.label = ttk.Label(self, text="You are about to install the Activity Browser.")
-        self.label.pack(pady=10)
-
-        # Create and pack the install button
-        self.install_button = ttk.Button(self, text="Install", command=self.confirmed)
-        self.install_button.pack(pady=5)
-
-        # Create (but don't pack) the progress bar
-        self.progress = IntVar()
-        self.progress_bar = ttk.Progressbar(self, maximum=100, variable=self.progress)
-
-    def confirmed(self):
-        self.install_button.destroy()
-        self.progress_bar.pack(padx=10, fill="x", expand=1)
-        threading.Thread(target=self.install_fn).start()
-
-    def success(self):
-        self.progress_bar.destroy()
-        self.notify("Installation successful")
-        launch_button = ttk.Button(self, text="Launch the Activity Browser", command=self.destroy)
-        launch_button.pack(pady=5)
-
-    def notify(self, message, also_print=True):
-        if also_print:
-            print(message)
-        self.label.config(text=message)
-
-    def undefined_progress(self):
-        setattr(self.progress_bar, "undefined_progress", True)
-        self.progress_bar.config(mode="indeterminate")
-        self.progress_bar.start(5)
-        self.progress.set(0)
-
-    def set_progress(self, progress: float):
-        if getattr(self.progress_bar, "undefined_progress", False):
-            setattr(self.progress_bar, "undefined_progress", False)
-            self.progress_bar.config(mode="determinate")
-            self.progress_bar.stop()
-        self.progress.set(int(progress))
+from ab_launcher import paths
 
 
 class Installer:
 
-    def __init__(self):
-        self.exit_code = 0
-        self.notifier = InstallationNotifier(self.threaded_install)
-
-    def start(self):
-        self.notifier.mainloop()
-        return self.exit_code
-
-    def quit(self, code):
-        self.exit_code = code
-        if code == 0:
-            self.notifier.success()
-        else:
-            self.notifier.notify("Installation failed")
+    def __init__(self, notifier):
+        self.notifier = notifier
 
     def threaded_install(self):
         try:
@@ -96,12 +25,12 @@ class Installer:
             self.install_spec_env(dl)
 
             # create installed file as a flag that installation was successful
-            with open(os.path.join(AB_DIR, "installed"), "w") as file:
+            with open(os.path.join(paths.AB_DIR, "installed"), "w") as file:
                 file.writelines(["Installed"])
 
-            self.quit(0)
+            self.notifier.after(1, self.notifier.install_done, 0)
         except Exception as e:
-            self.quit(1)
+            self.notifier.after(1, self.notifier.install_done, 1)
             raise e
 
     def download_base_env(self):
@@ -129,7 +58,7 @@ class Installer:
         self.notifier.undefined_progress()
 
         with tarfile.open(download) as file:
-            file.extractall(ENV_DIR)
+            file.extractall(paths.ENV_DIR)
 
     def download_env_spec(self):
         self.notifier.notify("Downloading environment specification...")
@@ -152,7 +81,7 @@ class Installer:
         spec_packages = []
 
         try:
-            os.mkdir(PKGS_DIR)
+            os.mkdir(paths.PKGS_DIR)
         except FileExistsError:
             pass
 
@@ -163,7 +92,7 @@ class Installer:
 
                 line = line.strip()
                 spec_package = line.split('/')[-1]
-                if spec_package in os.listdir(PKGS_DIR):
+                if spec_package in os.listdir(paths.PKGS_DIR):
                     continue
                 spec_packages.append((spec_package, line))
 
@@ -190,7 +119,7 @@ class Installer:
         self.notifier.undefined_progress()
 
         installer = subprocess.Popen(
-            [PY_DIR, INSTALL, env_spec_path],
+            [paths.PY_DIR, paths.INSTALL, env_spec_path],
             stdout=subprocess.PIPE,
             text=True
         )
@@ -217,10 +146,7 @@ class Installer:
 
 def download_worker(arg):
     package_name, url, fin_queue = arg
-    urllib.request.urlretrieve(url, os.path.join(PKGS_DIR, package_name))
+    urllib.request.urlretrieve(url, os.path.join(paths.PKGS_DIR, package_name))
     print(f"Downloaded {package_name}")
     fin_queue.put(package_name)
 
-
-def install():
-    return Installer().start()
