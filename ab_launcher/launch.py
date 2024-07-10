@@ -10,13 +10,19 @@ class Launcher:
         self.notifier: main.Main = notifier
 
     def threaded_launch(self):
-        self.notifier.notify("Installing packages")
+        self.notifier.notify("Loading packages")
         self.notifier.undefined_progress()
+
+        flags = 0
+        if sys.platform == "win32":
+            flags = subprocess.CREATE_NO_WINDOW
 
         launcher = subprocess.Popen(
             [paths.PY_DIR, paths.LAUNCH],
             stdout=subprocess.PIPE,
-            text=True
+            stderr=subprocess.PIPE,
+            text=True,
+            creationflags=flags,
         )
 
         stream = ""
@@ -32,14 +38,15 @@ class Launcher:
 
         while anchors:
             char = launcher.stdout.read(1)
-            sys.stdout.write(char)
+            if sys.stdout:
+                sys.stdout.write(char)
             stream += char
             if anchors and anchors[0] in stream:
                 self.notifier.notify(anchors.pop(0), False)
                 stream = ""
 
-        sys.stdout.write("\n")
-        launcher.stdout = sys.stdout
+        if sys.stdout:
+            sys.stdout.write("\n")
 
         self.notifier.launch_done()
 

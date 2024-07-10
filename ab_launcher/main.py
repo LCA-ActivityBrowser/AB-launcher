@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk
 import os
@@ -100,5 +101,4 @@ class Main(tk.Tk):
 
 
 if __name__ == "__main__":
-    print(utils.get_mouse_pos())
     Main().mainloop()

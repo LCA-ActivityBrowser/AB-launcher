@@ -1,27 +1,27 @@
 
 def import_modules():
-    print("Loading numpy")
+    print("Loading numpy", flush=True)
     import numpy
 
-    print("Loading pandas")
+    print("Loading pandas", flush=True)
     import pandas
 
-    print("Loading PySide2")
+    print("Loading PySide2", flush=True)
     import PySide2
 
-    print("Loading bw2data")
+    print("Loading bw2data", flush=True)
     import bw2data
 
-    print("Loading bw2io")
+    print("Loading bw2io", flush=True)
     import bw2io
 
-    print("Loading bw2calc")
+    print("Loading bw2calc", flush=True)
     import bw2calc
 
-    print("Loading Activity Browser")
+    print("Loading Activity Browser", flush=True)
     import activity_browser
 
-    print("Done")
+    print("Done", flush=True)
 
 def launch():
     from activity_browser import run_activity_browser

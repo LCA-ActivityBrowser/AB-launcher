@@ -4,6 +4,7 @@ data_list = [
     ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
     ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
     ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
+    ('./ab_launcher/assets/splash.png', './ab_launcher/assets/'),
 ]
 
 
@@ -35,7 +36,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
