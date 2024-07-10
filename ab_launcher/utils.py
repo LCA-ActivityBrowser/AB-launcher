@@ -110,7 +110,6 @@ def mac_get_display():
             y=int(f.origin.y),
             width=int(f.size.width),
             height=int(f.size.height),
-            is_primary=check_primary(screens, screen),
         )
 
 
@@ -130,15 +129,17 @@ def windows_get_mouse_pos():
 
 
 def mac_get_mouse_pos():
-    return
-    raise NotImplementedError
+    import AppKit
+
+    # Get the current mouse position
+    return AppKit.NSEvent.mouseLocation()
 
 
 def get_active_screen_center():
     pos = get_mouse_pos()
     if not pos:
         return
-    for disp in win_get_display():
+    for disp in get_display():
         if disp.x < pos[0] < disp.x + disp.width and disp.y < pos[1] < disp.y + disp.height:
             x = disp.x + (disp.width / 2)
             y = disp.y + (disp.height / 2)
