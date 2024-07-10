@@ -19,9 +19,9 @@ class Installer:
             self.extract_base_env(dl)
 
             dl = self.download_env_spec()
-            missing_pkgs = self.check_downloaded_packages(dl)
-            if missing_pkgs:
-                self.download_spec_packages(missing_pkgs)
+            # missing_pkgs = self.check_downloaded_packages(dl)
+            # if missing_pkgs:
+            #     self.download_spec_packages(missing_pkgs)
             self.install_spec_env(dl)
 
             # create installed file as a flag that installation was successful
@@ -99,6 +99,7 @@ class Installer:
         return spec_packages
 
     def download_spec_packages(self, spec_packages: list[tuple]):
+        return
         self.notifier.notify("Downloading necessary packages")
         self.notifier.set_progress(0)
         fin_queue = multiprocessing.Manager().Queue()
@@ -113,15 +114,24 @@ class Installer:
                 self.notifier.set_progress(percent)
 
                 finished.append(fin_queue.get())
+        self.notifier.notify("Downloading done")
+        import time
+        time.sleep(5)
 
     def install_spec_env(self, env_spec_path: str):
         self.notifier.notify("Installing packages")
         self.notifier.undefined_progress()
 
+        flags = 0
+        if sys.platform == "win32":
+            flags = subprocess.CREATE_NO_WINDOW
+
         installer = subprocess.Popen(
             [paths.PY_DIR, paths.INSTALL, env_spec_path],
             stdout=subprocess.PIPE,
-            text=True
+            stderr=subprocess.PIPE,
+            text=True,
+            creationflags=flags,
         )
 
         stream = ""
@@ -134,7 +144,8 @@ class Installer:
 
         while installer.poll() is None:
             char = installer.stdout.read(1)
-            sys.stdout.write(char)
+            if sys.stdout:
+                sys.stdout.write(char)
             stream += char
             if anchors and anchors[0] in stream:
                 self.notifier.notify(anchors.pop(0), False)
