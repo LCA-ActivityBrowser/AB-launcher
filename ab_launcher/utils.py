@@ -130,11 +130,14 @@ def windows_get_mouse_pos():
 
 
 def mac_get_mouse_pos():
+    return
     raise NotImplementedError
 
 
 def get_active_screen_center():
-    pos = windows_get_mouse_pos()
+    pos = get_mouse_pos()
+    if not pos:
+        return
     for disp in win_get_display():
         if disp.x < pos[0] < disp.x + disp.width and disp.y < pos[1] < disp.y + disp.height:
             x = disp.x + (disp.width / 2)

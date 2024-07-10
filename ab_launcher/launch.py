@@ -1,8 +1,10 @@
 import subprocess
 import sys
+import os
 
 from ab_launcher import paths, main
 
+os.environ["CONDA_PREFIX"] = paths.ENV_DIR
 
 class Launcher:
 
@@ -18,7 +20,7 @@ class Launcher:
             flags = subprocess.CREATE_NO_WINDOW
 
         launcher = subprocess.Popen(
-            [paths.PY_DIR, paths.LAUNCH],
+            [paths.ENV_PY_DIR, paths.LAUNCH],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
