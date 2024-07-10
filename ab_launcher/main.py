@@ -26,28 +26,29 @@ class Main(tk.Tk):
         self.overrideredirect(True)
         self.configure(background="white")
 
+        style = ttk.Style(self)
+        style.theme_use('classic')
+
         # Set splash image
         img = tk.PhotoImage(file=os.path.join(paths.LOCAL, "assets", "splash.png"))
-        panel = ttk.Label(self, image=img, background="white")
+        panel = ttk.Label(self, image=img)
         panel.image = img
+        panel["background"] = "white"
         panel.pack()
 
         # Create and pack the label
         self.label = ttk.Label(self, text="Launcher Version: 0.0.0", background="white")
-        self.label.place(x=10, y=257)
+        self.label.configure(background="white")
+        self.label.place(x=10, y=280, anchor="sw")
 
         # Create and pack the install button
         self.install_button = ttk.Button(self, text="Install Activity Browser", command=self.install_confirmed)
 
         # Create (but don't pack) the progress bar
-        self.progress_bar = widgets.SpecialProgressBar()
+        self.progress_bar = widgets.SpecialProgressBar(self)
 
         self.center_window()
 
-        # if sys.platform == "win32":
-        #     self.center_window()
-        # else:
-        #     self.geometry('500x320+100+100')
 
     def center_window(self):
         x, y = utils.get_active_screen_center()
@@ -57,12 +58,12 @@ class Main(tk.Tk):
         if not env_exists():
             self.install()
         else:
-            self.progress_bar.place(x=0, y=285)
+            self.progress_bar.place(x=0, y=293, anchor="sw")
             self.launch()
         super().mainloop(n)
 
     def install(self):
-        self.install_button.place(x=350, y=250)
+        self.install_button.place(x=500, y=280, anchor="se")
 
     def install_confirmed(self):
         from ab_launcher.install import Installer
@@ -70,7 +71,7 @@ class Main(tk.Tk):
         installer = Installer(self)
 
         self.install_button.destroy()
-        self.progress_bar.place(x=0, y=285)
+        self.progress_bar.place(x=0, y=293, anchor="sw")
         threading.Thread(target=installer.threaded_install).start()
 
     def install_done(self, code: int):
