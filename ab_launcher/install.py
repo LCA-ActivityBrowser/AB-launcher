@@ -7,6 +7,10 @@ import urllib.request
 
 from ab_launcher import paths
 
+# set conda environmental variables
+os.environ["CONDA_PREFIX"] = paths.BASE_DIR
+os.environ["CONDA_PKGS_DIRS"] = paths.PKGS_DIR
+os.environ["CONDA_REGISTER_ENVS"] = "false"
 
 class Installer:
 
@@ -58,14 +62,14 @@ class Installer:
         self.notifier.undefined_progress()
 
         with tarfile.open(download) as file:
-            file.extractall(paths.ENV_DIR)
+            file.extractall(paths.BASE_DIR)
 
     def download_env_spec(self):
         self.notifier.notify("Downloading environment specification...")
         if sys.platform == "win32":
             env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/win-environment_spec.txt"
         elif sys.platform == "darwin":
-            env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/mac-environment_spec.txt"
+            env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/ca56eb1dafb7ff0cfda42fb51927afd453a0c68e/ab_launcher/download/mac-environment_spec.txt"
         else:
             raise OSError
         path, _ = urllib.request.urlretrieve(env_spec_url)
@@ -127,9 +131,9 @@ class Installer:
             flags = subprocess.CREATE_NO_WINDOW
 
         installer = subprocess.Popen(
-            [paths.PY_DIR, paths.INSTALL, env_spec_path],
+            [paths.BASE_PY_DIR, paths.INSTALL, paths.ENV_DIR, env_spec_path],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            #stderr=subprocess.PIPE,
             text=True,
             creationflags=flags,
         )
