@@ -42,12 +42,14 @@ class Main(tk.Tk):
         # Create (but don't pack) the progress bar
         self.progress_bar = widgets.SpecialProgressBar()
 
-        #self.center_window()
-        self.geometry(f'500x320+100+100')
+        if sys.platform == "win32":
+            self.center_window()
+        else:
+            self.geometry('500x320+100+100')
 
     def center_window(self):
         x, y = utils.get_active_screen_center()
-        self.geometry(f'500x320+{x-250}+{y-150}')
+        self.geometry(f'500x293+{x-250}+{y-150}')
 
     def mainloop(self, n=0):
         if not env_exists():
