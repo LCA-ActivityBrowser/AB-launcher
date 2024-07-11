@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 import urllib.request
 
 from ab_launcher import paths
@@ -24,6 +25,15 @@ class Installer:
                     specs.append(line.strip())
 
             explicit_updater(specs, self.notifier)
+
+            if sys.platform == "darwin":
+                post_install = subprocess.Popen(
+                    [paths.MAC_POST_INSTALL,
+                     os.path.join(paths.LOCAL, "assets", "activity-browser.icns"),
+                     os.path.join(paths.ENV_DIR, "bin", "python3.11")
+                     ]
+                )
+                post_install.wait()
 
             # create installed file as a flag that installation was successful
             with open(os.path.join(paths.AB_DIR, "installed"), "w") as file:
