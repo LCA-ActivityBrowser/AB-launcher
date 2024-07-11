@@ -1,4 +1,6 @@
 import os
+import sys
+
 from ab_launcher import paths
 from conda.misc import (
     CondaExitZero,
@@ -21,8 +23,7 @@ from conda.misc import (
 from conda.base import constants
 
 # set conda context
-context.always_copy = False
-context.allow_softlinks = True
+context.always_copy = True
 context.safety_checks = constants.SafetyChecks.disabled
 
 

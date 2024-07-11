@@ -1,8 +1,8 @@
-import sys
 import tkinter as tk
 from tkinter import ttk
 import os
 import threading
+import sys
 
 from io import StringIO
 from ab_launcher import paths, utils, widgets
@@ -118,3 +118,6 @@ class Main(tk.Tk):
 
 if __name__ == "__main__":
     Main().mainloop()
+
+    from activity_browser import run_activity_browser
+    run_activity_browser()

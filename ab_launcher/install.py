@@ -28,10 +28,8 @@ class Installer:
 
             if sys.platform == "darwin":
                 post_install = subprocess.Popen(
-                    [paths.MAC_POST_INSTALL,
-                     os.path.join(paths.LOCAL, "assets", "activity-browser.icns"),
-                     os.path.join(paths.ENV_DIR, "bin", "python3.11")
-                     ]
+                    [paths.MAC_POST_INSTALL],
+                    cwd=paths.LOCAL,
                 )
                 post_install.wait()
 

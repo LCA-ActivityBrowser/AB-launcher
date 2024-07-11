@@ -1,8 +1,12 @@
 #!/bin/sh
+
+
+### SETTING THE PYTHON EXECUTABLE ICON TO AB
+
 # Sets an icon on file or directory
 # Usage setIcon.sh iconimage.jpg /path/to/[file|folder]
-iconSource=$1
-iconDestination=$2
+iconSource=./assets/activity-browser.icns
+iconDestination=./AB/environment/bin/python3.11
 icon=/tmp/`basename $iconSource`
 rsrc=/tmp/icon.rsrc
 
@@ -18,20 +22,11 @@ DeRez -only icns $icon > $rsrc
 # Apply the rsrc file to
 SetFile -a C $iconDestination
 
-if [ -f $iconDestination ]; then
-    # Destination is a file
-    Rez -append $rsrc -o $iconDestination
-elif [ -d $iconDestination ]; then
-    # Destination is a directory
-    # Create the magical Icon\r file
-    touch $iconDestination/$'Icon\r'
-    Rez -append $rsrc -o $iconDestination/Icon?
-    SetFile -a V $iconDestination/Icon?
-fi
+# Destination is a file
+Rez -append $rsrc -o $iconDestination
 
-# Sometimes Finder needs to be reactivated
-#osascript -e 'tell application "Finder" to quit'
-#osascript -e 'delay 2'
-#osascript -e 'tell application "Finder" to activate'
-
+# Remove files that we don't need anymore
 rm $rsrc $icon
+
+##
+rm -rf ./AB/pkgs

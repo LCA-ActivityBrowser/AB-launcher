@@ -1,10 +1,13 @@
 import subprocess
 import sys
 import os
+import importlib
 
 from ab_launcher import paths, main
 
 os.environ["CONDA_PREFIX"] = paths.ENV_DIR
+
+redlist = ["logging"]
 
 class Launcher:
 
@@ -12,6 +15,39 @@ class Launcher:
         self.notifier: main.Main = notifier
 
     def threaded_launch(self):
+        self.notifier.notify("Setting environment")
+        self.notifier.undefined_progress()
+        post = ['/lib/python311.zip', '/lib/python3.11', '/lib/python3.11/lib-dynload', '/lib/python3.11/site-packages']
+
+        for path in reversed(post):
+            sys.path.insert(0, paths.ENV_DIR + path)
+
+        importlib.invalidate_caches()
+
+        self.notifier.notify("Loading numpy")
+        import numpy
+
+        self.notifier.notify("Loading pandas")
+        import pandas
+
+        self.notifier.notify("Loading PySide2")
+        import PySide2
+
+        self.notifier.notify("Loading bw2data")
+        import bw2data
+
+        self.notifier.notify("Loading bw2io")
+        import bw2io
+
+        self.notifier.notify("Loading bw2calc")
+        import bw2calc
+
+        self.notifier.notify("Launching Activity Browser")
+        self.notifier.set_progress(100)
+
+        self.notifier.launch_done()
+
+    def threaded_launch_bak(self):
         self.notifier.notify("Loading packages")
         self.notifier.undefined_progress()
 
