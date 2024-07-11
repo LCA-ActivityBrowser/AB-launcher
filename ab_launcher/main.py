@@ -49,7 +49,6 @@ class Main(tk.Tk):
 
         self.center_window()
 
-
     def center_window(self):
         x, y = utils.get_active_screen_center()
         self.geometry(f'500x293+{x-250}+{y-150}')

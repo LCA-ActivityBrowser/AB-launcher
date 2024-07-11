@@ -3,22 +3,18 @@
 
 block_cipher = None
 
-
-datafiles = [
-    ('./install.py', '.'),
-    ('./launch.py', '.'),
-    ('./download/win-environment.tar.gz', './download/'),
-    ('./download/win-environment_spec.txt', './download/'),
-    ('./download/mac-environment.tar.gz', './download/'),
-    ('./download/mac-environment_spec.txt', './download/'),
+data_list = [
+    ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
+    ('./ab_launcher/assets/splash.png', './ab_launcher/assets/'),
 ]
 
-
 a = Analysis(
-    ['main.py'],
+    ['ab_launcher/main.py'],
     pathex=[],
     binaries=[],
-    datas=datafiles,
+    datas=data_list,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -34,17 +30,13 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
     [],
-    name='main',
+    exclude_binaries=True,
+    name='Activity Browser',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    upx_exclude=[],
-    runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -52,9 +44,19 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
-app = BUNDLE(
+coll = COLLECT(
     exe,
-    name='main.app',
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='Activity Browser',
+)
+app = BUNDLE(
+    coll,
+    name='Activity Browser',
     icon=None,
     bundle_identifier=None,
 )
