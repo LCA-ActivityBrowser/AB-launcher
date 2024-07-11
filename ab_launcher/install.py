@@ -157,6 +157,14 @@ class Installer:
         if installer.poll() != 0:
             raise Exception("Conda install failed")
 
+        if sys.platform == "darwin":
+            post_install = subprocess.Popen(
+                [paths.MAC_POST_INSTALL,
+                 os.path.join(paths.LOCAL, "assets", "activity-browser.icns"),
+                 os.path.join(paths.ENV_DIR, "bin", "python3.11")
+                 ]
+            )
+
 
 def download_worker(arg):
     package_name, url, fin_queue = arg

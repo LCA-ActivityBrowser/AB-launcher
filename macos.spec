@@ -7,6 +7,7 @@ data_list = [
     ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
     ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
     ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
+    ('./ab_launcher/assets/activity-browser.icns', './ab_launcher/assets/'),
     ('./ab_launcher/assets/splash.png', './ab_launcher/assets/'),
 ]
 
@@ -57,6 +58,6 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='Activity Browser',
-    icon=None,
+    icon='ab_launcher/assets/activity-browser.icns',
     bundle_identifier=None,
 )
