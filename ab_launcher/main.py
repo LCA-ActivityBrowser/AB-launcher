@@ -4,7 +4,18 @@ from tkinter import ttk
 import os
 import threading
 
+from io import StringIO
 from ab_launcher import paths, utils, widgets
+
+# set conda environmental variables
+os.environ["CONDA_PREFIX"] = paths.BASE_DIR
+os.environ["CONDA_PKGS_DIRS"] = paths.PKGS_DIR
+os.environ["CONDA_REGISTER_ENVS"] = "false"
+
+if not sys.stdout:
+    sys.stdout = StringIO()
+    sys.stdin = StringIO()
+    sys.stderr = StringIO()
 
 
 def env_exists() -> bool:

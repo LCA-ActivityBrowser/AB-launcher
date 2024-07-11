@@ -1,16 +1,9 @@
 import os
 import sys
-import tarfile
-import subprocess
-import multiprocessing
 import urllib.request
 
 from ab_launcher import paths
-
-# set conda environmental variables
-os.environ["CONDA_PREFIX"] = paths.BASE_DIR
-os.environ["CONDA_PKGS_DIRS"] = paths.PKGS_DIR
-os.environ["CONDA_REGISTER_ENVS"] = "false"
+from ab_launcher.conda_utils import explicit_updater
 
 
 class Installer:
@@ -20,14 +13,17 @@ class Installer:
 
     def threaded_install(self):
         try:
-            dl = self.download_base_env()
-            self.extract_base_env(dl)
+            spec_file = self.download_env_spec()
 
-            dl = self.download_env_spec()
-            # missing_pkgs = self.check_downloaded_packages(dl)
-            # if missing_pkgs:
-            #     self.download_spec_packages(missing_pkgs)
-            self.install_spec_env(dl)
+            specs = []
+
+            with open(spec_file, 'r') as file:
+                for line in file.readlines():
+                    if line.startswith('#') or line.startswith('@'):
+                        continue
+                    specs.append(line.strip())
+
+            explicit_updater(specs, self.notifier)
 
             # create installed file as a flag that installation was successful
             with open(os.path.join(paths.AB_DIR, "installed"), "w") as file:
@@ -38,34 +34,8 @@ class Installer:
             self.notifier.after(1, self.notifier.install_done, 1)
             raise e
 
-    def download_base_env(self):
-
-        def report_hook(block_num, block_size, total_size):
-            if total_size == 0:
-                return
-            percent = (block_num * block_size) / total_size * 100
-            self.notifier.set_progress(percent)
-
-        self.notifier.set_progress(0)
-        self.notifier.notify("Downloading base environment...")
-
-        if sys.platform == "win32":
-            base_env_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/win-environment.tar.gz"
-        elif sys.platform == "darwin":
-            base_env_url = "https://github.com/mrvisscher/AB-launcher/raw/ac3dde812d7faac173e65972fefb29ae7b9e476d/ab_launcher/download/mac-environment.tar.gz"
-        else:
-            raise OSError
-        path, _ = urllib.request.urlretrieve(base_env_url, reporthook=report_hook)
-        return path
-
-    def extract_base_env(self, download):
-        self.notifier.notify("Extracting base environment tar...")
-        self.notifier.undefined_progress()
-
-        with tarfile.open(download) as file:
-            file.extractall(paths.BASE_DIR)
-
     def download_env_spec(self):
+        self.notifier.undefined_progress()
         self.notifier.notify("Downloading environment specification...")
         if sys.platform == "win32":
             env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/b9a16902e2d3fa97e17539fe88e38fb575ab9a9d/ab_launcher/download/win-environment_spec.txt"
@@ -80,95 +50,4 @@ class Installer:
         os.rename(path, txt_path)
 
         return txt_path
-
-    def check_downloaded_packages(self, env_spec_path: str) -> list[tuple]:
-        self.notifier.notify("Checking for downloaded packages...")
-        spec_packages = []
-
-        try:
-            os.mkdir(paths.PKGS_DIR)
-        except FileExistsError:
-            pass
-
-        with open(env_spec_path, "r") as file:
-            for line in file.readlines():
-                if line.startswith('#') or line.startswith('@'):
-                    continue
-
-                line = line.strip()
-                spec_package = line.split('/')[-1]
-                if spec_package in os.listdir(paths.PKGS_DIR):
-                    continue
-                spec_packages.append((spec_package, line))
-
-        return spec_packages
-
-    def download_spec_packages(self, spec_packages: list[tuple]):
-        return
-        self.notifier.notify("Downloading necessary packages")
-        self.notifier.set_progress(0)
-        fin_queue = multiprocessing.Manager().Queue()
-        finished = []
-
-        with multiprocessing.Pool(os.cpu_count()) as pool:
-            mapping = [(x, y, fin_queue) for x, y in spec_packages]
-            pool.map_async(download_worker, mapping, error_callback=print)
-
-            while len(finished) < len(spec_packages):
-                percent = (len(finished) / len(spec_packages)) * 100
-                self.notifier.set_progress(percent)
-
-                finished.append(fin_queue.get())
-        self.notifier.notify("Downloading done")
-        import time
-        time.sleep(5)
-
-    def install_spec_env(self, env_spec_path: str):
-        self.notifier.notify("Downloading packages")
-        self.notifier.undefined_progress()
-
-        flags = 0
-        if sys.platform == "win32":
-            flags = subprocess.CREATE_NO_WINDOW
-
-        installer = subprocess.Popen(
-            [paths.BASE_PY_DIR, paths.INSTALL, paths.ENV_DIR, env_spec_path],
-            stdout=subprocess.PIPE,
-            #stderr=subprocess.PIPE,
-            text=True,
-            creationflags=flags,
-        )
-
-        stream = ""
-        anchors = ["Preparing transaction",
-                   "Verifying transaction",
-                   "Executing transaction",
-                   ]
-
-        while installer.poll() is None:
-            char = installer.stdout.read(1)
-            if sys.stdout:
-                sys.stdout.write(char)
-            stream += char
-            if anchors and anchors[0] in stream:
-                self.notifier.notify(anchors.pop(0), False)
-                stream = ""
-
-        if installer.poll() != 0:
-            raise Exception("Conda install failed")
-
-        if sys.platform == "darwin":
-            post_install = subprocess.Popen(
-                [paths.MAC_POST_INSTALL,
-                 os.path.join(paths.LOCAL, "assets", "activity-browser.icns"),
-                 os.path.join(paths.ENV_DIR, "bin", "python3.11")
-                 ]
-            )
-
-
-def download_worker(arg):
-    package_name, url, fin_queue = arg
-    urllib.request.urlretrieve(url, os.path.join(paths.PKGS_DIR, package_name))
-    print(f"Downloaded {package_name}")
-    fin_queue.put(package_name)
 
