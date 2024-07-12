@@ -1,6 +1,3 @@
-import os
-import sys
-
 from ab_launcher import paths
 from conda.misc import (
     CondaExitZero,

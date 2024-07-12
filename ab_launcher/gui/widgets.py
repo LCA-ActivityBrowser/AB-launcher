@@ -4,7 +4,7 @@ from tkinter import ttk
 
 class SpecialProgressBar(ttk.Frame):
     going = "right"
-    looping = False
+    looping = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
