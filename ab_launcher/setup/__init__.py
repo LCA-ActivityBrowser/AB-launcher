@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import urllib.request
+import json
 
 from ab_launcher import paths
 from ab_launcher.gui.splashscreen import splash
@@ -12,10 +13,16 @@ def download_env_spec():
     splash.undefined_progress()
     splash.notify("Downloading environment specification...")
 
+    base_url = "https://api.github.com/repos/mrvisscher/AB-launcher/contents/ab_releases/"
+    current_url = base_url + "current.json"
+    path, _ = urllib.request.urlretrieve(current_url)
+    with open(path) as json_file:
+        current = json.load(json_file)["ab"]
+
     if sys.platform == "win32":
-        env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/b9a16902e2d3fa97e17539fe88e38fb575ab9a9d/ab_launcher/download/win-environment_spec.txt"
+        env_spec_url = base_url + "windows/win-environment-" + current + ".txt"
     elif sys.platform == "darwin":
-        env_spec_url = "https://github.com/mrvisscher/AB-launcher/raw/ca56eb1dafb7ff0cfda42fb51927afd453a0c68e/ab_launcher/download/mac-environment_spec.txt"
+        env_spec_url = base_url + "macos/macos-environment-" + current + ".txt"
     else:
         raise OSError
     path, _ = urllib.request.urlretrieve(env_spec_url)
