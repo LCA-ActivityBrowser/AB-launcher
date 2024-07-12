@@ -10,6 +10,10 @@ import ab_launcher.gui.splashscreen as gui
 os.environ["CONDA_PREFIX"] = ab_launcher.paths.ENV_DIR
 os.environ["CONDA_PKGS_DIRS"] = ab_launcher.paths.PKGS_DIR
 os.environ["CONDA_REGISTER_ENVS"] = "false"
+os.environ["CONDA_EXE"] = ""
+os.environ["CONDA_PYTHON_EXE"] = ""
+os.environ["CONDA_DEFAULT_ENV"] = ""
+os.environ["CONDA_ROOT"] = ""
 
 # stdio fallbacks when built without terminal
 if not sys.stdout:
