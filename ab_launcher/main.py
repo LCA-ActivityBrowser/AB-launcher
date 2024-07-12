@@ -18,17 +18,13 @@ if not sys.stdout:
     sys.stderr = io.StringIO()
 
 
-def init_splash_thread() -> threading.Thread:
-    initialized = threading.Event()
+class Manager(threading.Thread):
 
-    thread = threading.Thread(
-        name="tkinter",
-        target=gui.show_splash,
-        args=[initialized]
-    )
-    thread.start()
-    initialized.wait()
-    return thread
+    def run(self):
+        if ab_launcher.SETUP:
+            do_setup()
+
+        do_launch()
 
 
 def do_setup():
@@ -48,13 +44,8 @@ def do_launch():
 
 
 if __name__ == "__main__":
-    splash_thread = init_splash_thread()
+    manager = Manager()
+    manager.start()
 
-    if ab_launcher.SETUP:
-        do_setup()
-
-    do_launch()
-
-    splash_thread.join()
-
+    gui.splash.mainloop()
 

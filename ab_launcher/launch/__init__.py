@@ -12,8 +12,13 @@ def windows_launch():
     splash.notify("Loading packages")
     splash.undefined_progress()
 
+    if os.path.isfile(os.path.join(paths.LOCAL, "assets", "windows.py")):
+        runner = os.path.join(paths.LOCAL, "assets", "windows.py")
+    else:
+        runner = windows.__file__
+
     launcher = subprocess.Popen(
-        [paths.ENV_PY_DIR, os.path.join(paths.LOCAL, "assets", "windows.py")],
+        [paths.ENV_PY_DIR, runner],
         stdout=subprocess.PIPE,
         text=True,
         creationflags=subprocess.CREATE_NO_WINDOW,

@@ -1,5 +1,4 @@
 import os
-import threading
 
 import tkinter as tk
 from tkinter import ttk
@@ -55,11 +54,4 @@ class Splash(tk.Tk):
         self.progress_bar.set(int(progress))
 
 
-def show_splash(initialized: threading.Event):
-    global splash
-    splash = Splash()
-    initialized.set()
-    splash.mainloop()
-
-
-splash: Splash = None
+splash = Splash()
