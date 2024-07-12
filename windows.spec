@@ -1,8 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 data_list = [
-    ('./ab_launcher/runners/install-runner.py', './ab_launcher/runners/'),
-    ('./ab_launcher/runners/launch-runner.py', './ab_launcher/runners/'),
+    ('./ab_launcher/launch/windows.py', './ab_launcher/assets/'),
     ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
     ('./ab_launcher/assets/splash.png', './ab_launcher/assets/'),
 ]

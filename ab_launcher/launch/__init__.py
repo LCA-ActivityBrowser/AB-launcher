@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import os
 
 from ab_launcher import paths
 from ab_launcher.gui.splashscreen import splash
@@ -12,7 +13,7 @@ def windows_launch():
     splash.undefined_progress()
 
     launcher = subprocess.Popen(
-        [paths.ENV_PY_DIR, windows.__file__],
+        [paths.ENV_PY_DIR, os.path.join(paths.LOCAL, "assets", "windows.py")],
         stdout=subprocess.PIPE,
         text=True,
         creationflags=subprocess.CREATE_NO_WINDOW,
