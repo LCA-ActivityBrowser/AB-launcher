@@ -1,3 +1,4 @@
+# windows needs to launch from a subprocess directed from the environmental python.exe
 
 def import_modules():
     print("Loading numpy", flush=True)
@@ -26,8 +27,6 @@ def import_modules():
 def launch():
     from activity_browser import run_activity_browser
     run_activity_browser()
-
-
 
 if __name__ == "__main__":
     import_modules()

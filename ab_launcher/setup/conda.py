@@ -1,33 +1,16 @@
-import os
 from ab_launcher import paths
-from conda.misc import (
-    CondaExitZero,
-    DryRunExit,
-    MatchSpec,
-    PackageCacheData,
-    ParseError,
-    PrefixData,
-    PrefixSetup,
-    ProgressiveFetchExtract,
-    UnlinkLinkTransaction,
-    context,
-    defaultdict,
-    expand,
-    is_url,
-    join_url,
-    path_to_url,
-    url_pat,
-)
+from .linking import conda_create  # needed for patching
+import conda.misc as conda_misc
 from conda.base import constants
 
+
 # set conda context
-context.always_copy = False
-context.allow_softlinks = True
-context.safety_checks = constants.SafetyChecks.disabled
+conda_misc.context.always_copy = True
+conda_misc.context.safety_checks = constants.SafetyChecks.disabled
 
 
 def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
-    actions = defaultdict(list)
+    actions = conda_misc.defaultdict(list)
     actions["PREFIX"] = prefix
 
     fetch_specs = []
@@ -35,7 +18,7 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
         if spec == "@EXPLICIT":
             continue
 
-        if not is_url(spec):
+        if not conda_misc.is_url(spec):
             """
             # This does not work because url_to_path does not enforce Windows
             # backslashes. Should it? Seems like a dangerous change to make but
@@ -45,27 +28,27 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
             pathed = url_to_path(urled)
             assert pathed == expanded
             """
-            spec = path_to_url(expand(spec))
+            spec = conda_misc.path_to_url(conda_misc.expand(spec))
 
         # parse URL
-        m = url_pat.match(spec)
+        m = conda_misc.url_pat.match(spec)
         if m is None:
-            raise ParseError(f"Could not parse explicit URL: {spec}")
+            raise conda_misc.ParseError(f"Could not parse explicit URL: {spec}")
         url_p, fn, md5sum = m.group("url_p"), m.group("fn"), m.group("md5")
-        url = join_url(url_p, fn)
+        url = conda_misc.join_url(url_p, fn)
         # url_p is everything but the tarball_basename and the md5sum
 
-        fetch_specs.append(MatchSpec(url, md5=md5sum) if md5sum else MatchSpec(url))
+        fetch_specs.append(conda_misc.MatchSpec(url, md5=md5sum) if md5sum else conda_misc.MatchSpec(url))
 
-    if context.dry_run:
-        raise DryRunExit()
+    if conda_misc.context.dry_run:
+        raise conda_misc.DryRunExit()
 
-    pfe = ProgressiveFetchExtract(fetch_specs)
+    pfe = conda_misc.ProgressiveFetchExtract(fetch_specs)
     notifier.notify("Downloading packages...", False)
     pfe.execute()
 
-    if context.download_only:
-        raise CondaExitZero(
+    if conda_misc.context.download_only:
+        raise conda_misc.CondaExitZero(
             "Package caches prepared. "
             "UnlinkLinkTransaction cancelled with --download-only option."
         )
@@ -73,7 +56,7 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
     # now make an UnlinkLinkTransaction with the PackageCacheRecords as inputs
     # need to add package name to fetch_specs so that history parsing keeps track of them correctly
     specs_pcrecs = tuple(
-        [spec, next(PackageCacheData.query_all(spec), None)] for spec in fetch_specs
+        [spec, next(conda_misc.PackageCacheData.query_all(spec), None)] for spec in fetch_specs
     )
 
     # Assert that every spec has a PackageCacheRecord
@@ -90,11 +73,11 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
             )
 
     precs_to_remove = []
-    prefix_data = PrefixData(prefix)
+    prefix_data = conda_misc.PrefixData(prefix)
     installed = {rec.name for rec in prefix_data.iter_records()}
 
     for q, (spec, pcrec) in enumerate(specs_pcrecs):
-        new_spec = MatchSpec(spec, name=pcrec.name)
+        new_spec = conda_misc.MatchSpec(spec, name=pcrec.name)
         specs_pcrecs[q][0] = new_spec
 
         #prec = prefix_data.get(pcrec.name, None)
@@ -111,7 +94,7 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
     leftover_precs = [prefix_data.get(rec_name, None) for rec_name in installed]
     precs_to_remove.extend(leftover_precs)
 
-    stp = PrefixSetup(
+    stp = conda_misc.PrefixSetup(
         prefix,
         precs_to_remove,
         tuple(sp[1] for sp in specs_pcrecs if sp[0]),
@@ -121,7 +104,7 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
     )
 
     txn = NotifiedUnlinkLinkTransaction(notifier, stp)
-    if not context.json and not context.quiet:
+    if not conda_misc.context.json and not conda_misc.context.quiet:
         txn.print_transaction_summary()
 
     txn.prepare()
@@ -129,7 +112,7 @@ def explicit_updater(specs, notifier, prefix=paths.ENV_DIR):
     txn.execute()
 
 
-class NotifiedUnlinkLinkTransaction(UnlinkLinkTransaction):
+class NotifiedUnlinkLinkTransaction(conda_misc.UnlinkLinkTransaction):
     def __init__(self, notifier, *args):
         super().__init__(*args)
         self.notifier = notifier
