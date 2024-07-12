@@ -49,3 +49,6 @@ if __name__ == "__main__":
 
     gui.splash.mainloop()
 
+    if sys.platform == "darwin":
+        from activity_browser import run_activity_browser
+        run_activity_browser()

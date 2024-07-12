@@ -5,8 +5,7 @@ import sys
 from ab_launcher import paths
 from ab_launcher.gui.splashscreen import splash
 
-post = ['\\python311.zip', '\\DLLs', '\\Lib', '', '\\Lib\\site-packages', '\\Lib\\site-packages\\win32', '\\Lib\\site-packages\\win32\\lib', '\\Lib\\site-packages\\Pythonwin', ]
-
+post = ['/lib/python311.zip', '/lib/python3.11', '/lib/python3.11/lib-dynload', '/lib/python3.11/site-packages']
 
 def macos_launch():
     splash.notify("Setting environment")
@@ -35,7 +34,7 @@ def macos_launch():
     splash.notify("Loading bw2calc")
     import bw2calc
 
-    splash.notify("Launching Activity Browser")
+    splash.notify("Loading Activity Browser")
     splash.set_progress(100)
 
-    splash.after(2000, splash.destroy)
+    splash.after(500, splash.destroy)
