@@ -16,7 +16,7 @@ jobs:
       latest: ${{ steps.check_anaconda.outputs.latest_version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get current version from repo
         id: check_repo
@@ -52,7 +52,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install current environment
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -65,7 +65,8 @@ jobs:
         run: |
           echo micromamba env export --explicit -n environment >> ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          git commit -a -m "Updated windows spec to ${{needs.check-release.outputs.latest}}"
       - name: Create pull request
-        run: gh pr create -B main -H main --title 'Merge branch_to_merge into base_branch' --body 'Created by Github action'
+        run: gh pr create -B main -H main --title 'Updated windows spec' --body 'Created by Github action'
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
