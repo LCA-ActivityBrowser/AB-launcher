@@ -9,61 +9,66 @@ from ab_launcher.gui.splashscreen import splash
 from ab_launcher.setup.conda import explicit_updater
 
 
-def download_env_spec():
-    splash.undefined_progress()
-    splash.notify("Downloading environment specification...")
+class Setup:
+    current = None
 
-    base_url = "https://api.github.com/repos/mrvisscher/AB-launcher/contents/ab_releases/"
-    current_url = base_url + "current.json"
-    path, _ = urllib.request.urlretrieve(current_url)
-    with open(path) as json_file:
-        current = json.load(json_file)["ab"]
+    def download_env_spec(self):
+        splash.undefined_progress()
+        splash.notify("Downloading environment specification...")
 
-    if sys.platform == "win32":
-        env_spec_url = base_url + "windows/win-environment-" + current + ".txt"
-    elif sys.platform == "darwin":
-        env_spec_url = base_url + "macos/macos-environment-" + current + ".txt"
-    else:
-        raise OSError
-    path, _ = urllib.request.urlretrieve(env_spec_url)
+        base_url = "https://raw.githubusercontent.com/mrvisscher/AB-launcher/main/ab_releases/"
+        current_url = base_url + "current.json"
+        path, _ = urllib.request.urlretrieve(current_url)
+        with open(path) as json_file:
+            self.current = json.load(json_file)["dev"]  # should be configurable between dev and stable
 
-    # rename to a .txt file, because that's what conda supports
-    txt_path = path + ".txt"
-    os.rename(path, txt_path)
+        if sys.platform == "win32":
+            env_spec_url = base_url + "dev/windows/win-environment-" + self.current + ".txt"
+        elif sys.platform == "darwin":
+            env_spec_url = base_url + "dev/macos/macos-environment-" + self.current + ".txt"
+        else:
+            raise OSError
+        path, _ = urllib.request.urlretrieve(env_spec_url)
 
-    return txt_path
+        return path
 
+    def set_config_file(self):
+        # create installed file as a flag that installation was successful
+        with open(os.path.join(paths.AB_DIR, "config"), "w") as file:
+            data = {
+                "launcher": {
+                    "launcher_version": "0.0.0",
+                    "ab_version": self.current,
+                    "ignored_updates": [],
+                }
+            }
 
-def set_flag_file():
-    # create installed file as a flag that installation was successful
-    with open(os.path.join(paths.AB_DIR, "installed"), "w") as file:
-        file.writelines(["Installed"])
+            file.write(json.dumps(data))
 
+    def parse_env_spec(self, file_loc: str) -> list[str]:
+        specs = []
 
-def parse_env_spec(file_loc: str) -> list[str]:
-    specs = []
+        with open(file_loc, 'r') as file:
+            for line in file.readlines():
+                if line.startswith('#') or line.startswith('@'):
+                    continue
+                specs.append(line.strip())
 
-    with open(file_loc, 'r') as file:
-        for line in file.readlines():
-            if line.startswith('#') or line.startswith('@'):
-                continue
-            specs.append(line.strip())
+        return specs
 
-    return specs
-
-
-def post_install():
-    shutil.rmtree(paths.PKGS_DIR)
+    def post_install(self):
+        shutil.rmtree(paths.PKGS_DIR)
 
 
 def setup():
-    spec_file = download_env_spec()
+    setupper = Setup()
+    spec_file = setupper.download_env_spec()
 
-    specs = parse_env_spec(spec_file)
+    specs = setupper.parse_env_spec(spec_file)
 
     explicit_updater(specs, splash)
 
-    post_install()
+    setupper.post_install()
 
-    set_flag_file()
+    setupper.set_config_file()
 
