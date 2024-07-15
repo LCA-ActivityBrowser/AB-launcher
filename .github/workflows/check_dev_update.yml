@@ -44,7 +44,6 @@ jobs:
   build-dev-windows:
     runs-on: windows-latest
     needs: check-release
-    if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     steps:
       - name: Check latest release version from Anaconda
         id: check_anaconda
