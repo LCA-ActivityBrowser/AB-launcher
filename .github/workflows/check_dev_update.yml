@@ -41,10 +41,7 @@ jobs:
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     steps:
-      - name: Perform action if new version is found
-        run: |
-          echo "New version found, performing actions..."
-          # Add your actions here, for example:
-          # - Send a notification
-          # - Create an issue
-          # - Trigger another workflow
+      - uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: ab_releases/dev/windows/win-environment-${{ needs.check-release.outputs.current }}.txt
+          create-args: --name environment
