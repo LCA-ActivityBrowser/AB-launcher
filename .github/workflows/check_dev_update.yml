@@ -12,13 +12,21 @@ jobs:
   check-release:
     runs-on: ubuntu-latest
     outputs:
-      current: steps.check_anaconda.outputs.current
-      latest: steps.check_anaconda.outputs.latest
+      current: ${{ steps.check_repo.current_version }}
+      latest: ${{ steps.check_anaconda.latest_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Check latest release version from Anaconda
+      - name: Get current version from repo
+        id: check_repo
+        run: |           
+          # Read the local version from version.json
+          CURRENT_VERSION=$(jq -r .dev ab_releases/current.json)
+          echo "Current version: $CURRENT_VERSION"
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get latest version from Anaconda
         id: check_anaconda
         run: |
           # Variables
@@ -30,14 +38,8 @@ jobs:
 
           # Extract the latest version for the specified label
           LATEST_VERSION=$(echo $PACKAGE_INFO | jq -r --arg LABEL "$LABEL" '.files[] | select(.labels[] == $LABEL) | .version' | sort -V | tail -n 1)
-          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
-          echo "::set-output name=latest::$LATEST_VERSION"
-          
-          # Read the local version from version.json
-          CURRENT_VERSION=$(jq -r .dev ab_releases/current.json)
-          echo "Current version: $CURRENT_VERSION"
-          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-          echo "::set-output name=current::$CURRENT_VERSION"
+          echo "Latest version: $LATEST_VERSION"
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
   build-dev-windows:
     runs-on: windows-latest
@@ -49,5 +51,5 @@ jobs:
         run: env
       - uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: ab_releases/dev/windows/win-environment-${{env.CURRENT_VERSION}}.txt
+          environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
           create-args: --name environment
