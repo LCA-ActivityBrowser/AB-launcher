@@ -64,6 +64,8 @@ jobs:
       - name: List updated environment
         run: |
           echo micromamba env export --explicit -n environment >> ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          git config --global user.email "action@github.com"
+          git config --global user.name "Github Action"
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
           git commit -a -m "Updated windows spec to ${{needs.check-release.outputs.latest}}"
       - name: Create pull request
