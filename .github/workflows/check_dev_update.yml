@@ -43,6 +43,8 @@ jobs:
 
   build-dev-windows:
     runs-on: windows-latest
+    permissions:
+      pull-requests: write
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     defaults:
