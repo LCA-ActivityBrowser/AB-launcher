@@ -48,7 +48,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - uses: mamba-org/setup-micromamba@v1
+      - name: Install current environment
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
           environment-name: environment
+      - name: Update to latest
+        run: |
+          conda install -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
+      - name: List updated environment
+        run: |
+          conda list
