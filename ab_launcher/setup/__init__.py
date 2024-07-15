@@ -57,7 +57,11 @@ class Setup:
         return specs
 
     def post_install(self):
-        shutil.rmtree(paths.PKGS_DIR)
+        try:
+            shutil.rmtree(paths.PKGS_DIR)
+        except FileNotFoundError:
+            # no pkg dir to worry about
+            pass
 
 
 def setup():

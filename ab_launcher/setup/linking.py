@@ -5,9 +5,6 @@ import ab_launcher.paths
 
 
 def create_link(src, dst, link_type, force=False):
-    if ab_launcher.paths.PKGS_DIR not in src:
-        return
-
     if link_type == conda_create.LinkType.directory:
         # A directory is technically not a link.  So link_type is a misnomer.
         #   Naming is hard.
@@ -15,6 +12,10 @@ def create_link(src, dst, link_type, force=False):
             conda_create.rm_rf(dst)
         conda_create.mkdir_p(dst)
         return
+
+    if ab_launcher.paths.PKGS_DIR not in src and ab_launcher.paths.ENV_DIR not in src:
+        return
+
     shutil.move(src, dst)
     return
 
