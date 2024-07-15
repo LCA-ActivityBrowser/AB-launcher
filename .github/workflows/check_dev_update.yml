@@ -43,6 +43,8 @@ jobs:
     runs-on: windows-latest
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
+    env:
+      CURRENT_VERSION: $CURRENT_VERSION
     steps:
       - uses: mamba-org/setup-micromamba@v1
         with:
