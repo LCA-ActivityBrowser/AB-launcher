@@ -12,8 +12,8 @@ jobs:
   check-release:
     runs-on: ubuntu-latest
     outputs:
-      current: ${{ steps.check_repo.current_version }}
-      latest: ${{ steps.check_anaconda.latest_version }}
+      current: ${{ steps.check_repo.outputs.current_version }}
+      latest: ${{ steps.check_anaconda.outputs.latest_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
