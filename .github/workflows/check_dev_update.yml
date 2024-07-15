@@ -13,9 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
       - name: Check latest release version from Anaconda
         id: check_anaconda
         run: |
@@ -28,19 +25,18 @@ jobs:
 
           # Extract the latest version for the specified label
           LATEST_VERSION=$(echo $PACKAGE_INFO | jq -r --arg LABEL "$LABEL" '.files[] | select(.labels[] == $LABEL) | .version' | sort -V | tail -n 1)
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
           
           # Read the local version from version.json
           LOCAL_VERSION=$(jq -r .dev ab_releases/current.json)
-          
-          # Compare versions and update if necessary
-          if [ "$LATEST_VERSION" != "$LOCAL_VERSION" ]; then
-            echo "New version found: $LATEST_VERSION"
-            echo "::set-output name=new_version::true"
-          else
-            echo "No new version found"
-            echo "::set-output name=new_version::false"
-          fi
+          echo "Current version: $LOCAL_VERSION"
+          echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
 
+  build-dev-windows:
+    runs-on: windows-latest
+    needs: check-release
+    if: ${{ env.LOCAL_VERSION != env.LATEST_VERSION }}
+    steps:
       - name: Perform action if new version is found
         if: steps.check_anaconda.outputs.new_version == 'true'
         run: |
