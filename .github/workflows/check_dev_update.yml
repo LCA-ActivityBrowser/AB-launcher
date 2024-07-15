@@ -62,7 +62,8 @@ jobs:
       - name: List updated environment
         run: |
           micromamba env export --explicit -n environment > ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}
       - name: Create pull request
-        run: gh pr create -B base_branch -H branch_to_merge --title 'Merge branch_to_merge into base_branch' --body 'Created by Github action'
+        run: gh pr create -B main -H main --title 'Merge branch_to_merge into base_branch' --body 'Created by Github action'
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
