@@ -1,0 +1,56 @@
+name: Check Dev Release
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install requests
+
+    - name: Check latest release version from Anaconda
+      id: check_anaconda
+      run: |
+        #!/usr/bin/env python
+        import requests
+        import json
+
+        # Dev api url
+        anaconda_api_url = f"https://api.anaconda.org/package/bsteubing/activity-browser-dev"
+
+        response = requests.get(anaconda_api_url)
+        data = response.json()
+        latest_version = data['latest_version']
+
+        with open('ab_releases/current.json', 'r') as f:
+            local_data = json.load(f)
+
+        local_version = local_data.get("dev")
+
+        if latest_version != local_version:
+            print("::set-output name=new_version::true")
+        else:
+            print("::set-output name=new_version::false")
+
+    - name: Perform action if new version is found
+      if: steps.check_anaconda.outputs.new_version == 'true'
+      run: |
+        echo "New version found, performing actions..."
+        # Add your actions here, for example:
+        # - Send a notification
+        # - Create an issue
+        # - Trigger another workflow
