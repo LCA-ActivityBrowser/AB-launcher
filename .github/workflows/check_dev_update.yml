@@ -35,7 +35,7 @@ jobs:
   build-dev-windows:
     runs-on: windows-latest
     needs: check-release
-    if: ${{ jobs.check-release.env.LOCAL_VERSION != jobs.check-release.env.LATEST_VERSION }}
+    if: ${{ needs.check-release.env.LOCAL_VERSION != needs.check-release.env.LATEST_VERSION }}
     steps:
       - name: Perform action if new version is found
         if: steps.check_anaconda.outputs.new_version == 'true'
