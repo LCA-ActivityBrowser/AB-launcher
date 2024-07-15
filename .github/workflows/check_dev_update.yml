@@ -46,8 +46,7 @@ jobs:
     steps:
       - name: Check latest release version from Anaconda
         id: check_anaconda
-        run: |
-          echo "$CURRENT_VERSION"
+        run: env
       - uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: ab_releases/dev/windows/win-environment-${{env.CURRENT_VERSION}}.txt
