@@ -44,10 +44,10 @@ jobs:
   build-dev-windows:
     runs-on: windows-latest
     needs: check-release
+    if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     steps:
-      - name: Check latest release version from Anaconda
-        id: check_anaconda
-        run: env
+      - name: Checkout repository
+        uses: actions/checkout@v2
       - uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
