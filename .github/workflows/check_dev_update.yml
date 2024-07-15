@@ -8,7 +8,9 @@ on:
 jobs:
   check-release:
     runs-on: ubuntu-latest
-
+    outputs:
+      current: steps.check_anaconda.outputs.current
+      latest: steps.check_anaconda.outputs.latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -26,19 +28,20 @@ jobs:
           # Extract the latest version for the specified label
           LATEST_VERSION=$(echo $PACKAGE_INFO | jq -r --arg LABEL "$LABEL" '.files[] | select(.labels[] == $LABEL) | .version' | sort -V | tail -n 1)
           echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+          echo "::set-output name=latest::$LATEST_VERSION"
           
           # Read the local version from version.json
           LOCAL_VERSION=$(jq -r .dev ab_releases/current.json)
           echo "Current version: $LOCAL_VERSION"
           echo "LOCAL_VERSION=$LOCAL_VERSION" >> $GITHUB_ENV
+          echo "::set-output name=current::$LOCAL_VERSION"
 
   build-dev-windows:
     runs-on: windows-latest
     needs: check-release
-    if: ${{ needs.check-release.env.LOCAL_VERSION != needs.check-release.env.LATEST_VERSION }}
+    if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     steps:
       - name: Perform action if new version is found
-        if: steps.check_anaconda.outputs.new_version == 'true'
         run: |
           echo "New version found, performing actions..."
           # Add your actions here, for example:
