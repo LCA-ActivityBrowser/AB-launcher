@@ -45,6 +45,9 @@ jobs:
     runs-on: windows-latest
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -55,8 +58,7 @@ jobs:
           environment-name: environment
       - name: Update to latest
         run: |
-          micromamba activate environment
-          micromamba install -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
+          micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
       - name: List updated environment
         run: |
-          micromamba list
+          micromamba list --explicit -n environment > ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
