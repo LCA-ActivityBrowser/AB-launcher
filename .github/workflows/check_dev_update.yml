@@ -61,4 +61,4 @@ jobs:
           micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
       - name: List updated environment
         run: |
-          micromamba list --explicit -n environment > ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          micromamba env export --explicit -n environment > ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
