@@ -51,4 +51,4 @@ jobs:
       - uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
-          create-args: --name environment
+          environment-name: environment
