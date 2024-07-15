@@ -19,11 +19,15 @@ jobs:
       - name: Check latest release version from Anaconda
         id: check_anaconda
         run: |
-          # Replace 'your-package-name' with the actual package name
+          # Variables
           ANACONDA_API_URL="https://api.anaconda.org/package/bsteubing/activity-browser-dev"
+          LABEL="main"
           
-          # Fetch the latest version from Anaconda
-          LATEST_VERSION=$(curl -s $ANACONDA_API_URL | jq -r .latest_version)
+          # Fetch the package information from Anaconda
+          PACKAGE_INFO=$(curl -s $ANACONDA_API_URL)
+
+          # Extract the latest version for the specified label
+          LATEST_VERSION=$(echo $PACKAGE_INFO | jq -r --arg LABEL "$LABEL" '.files[] | select(.labels[] == $LABEL) | .version' | sort -V | tail -n 1)
           
           # Read the local version from version.json
           LOCAL_VERSION=$(jq -r .dev ab_releases/current.json)
