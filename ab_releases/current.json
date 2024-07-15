@@ -1,4 +1,5 @@
 {
-  "ab": "dev",
+  "stable": "0",
+  "dev": "2.9.7dev297",
   "launcher": "0.0.0"
 }
