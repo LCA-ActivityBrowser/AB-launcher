@@ -55,6 +55,7 @@ jobs:
           environment-name: environment
       - name: Update to latest
         run: |
+          micromamba activate environment
           micromamba install -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
       - name: List updated environment
         run: |
