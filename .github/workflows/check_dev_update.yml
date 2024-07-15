@@ -16,7 +16,7 @@ jobs:
       latest: ${{ steps.check_anaconda.outputs.latest_version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get current version from repo
         id: check_repo
@@ -43,8 +43,6 @@ jobs:
 
   build-dev-windows:
     runs-on: windows-latest
-    permissions:
-      pull-requests: write
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
     defaults:
@@ -52,7 +50,7 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install current environment
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -61,17 +59,7 @@ jobs:
       - name: Update to latest
         run: |
           micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
-      - name: List updated environment
-        run: |
           echo micromamba env export --explicit -n environment >> ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
-          git config --global user.email "action@github.com"
-          git config --global user.name "Github Action"
-          git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
-          git commit -a -m "Updated windows spec to ${{needs.check-release.outputs.latest}}"
-      - name: Create pull request
-        run: gh pr create -B main -H main --title 'Updated windows spec' --body 'Created by Github action'
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload environment as artifact
         uses: actions/upload-artifact@master
         with:
@@ -84,7 +72,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Fetch Windows release spec
         uses: actions/download-artifact@master
         with:
