@@ -101,13 +101,14 @@ jobs:
         run: |
           JSON_KEY="dev"
           JSON_VALUE="${{needs.check-release.outputs.latest}}"
-          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/current.json > ab_releases/current.json
+          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/current.json > tmp.json && mv tmp.json ab_releases/current.json
       - name: Create commit
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
           git add ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
+          git add ab_releases/current.json
           git commit -m "Updated specs to ${{needs.check-release.outputs.latest}}"
           git push origin spec-${{needs.check-release.outputs.latest}}
       - name: Create PR
