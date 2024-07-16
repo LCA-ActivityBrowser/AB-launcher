@@ -54,8 +54,9 @@ jobs:
       - name: Install current environment
         uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
+          # environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
           environment-name: environment
+          create-args: python=3.11
       - name: Update to latest
         run: |
           micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
@@ -80,11 +81,11 @@ jobs:
           path: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
       - name: Create commit
         run: |
-          git checkout -b spec-${{needs.check-release.outputs.latest}}
-          git config --global user.email "action@github.com"
-          git config --global user.name "Github Action"
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
-          git commit -a -m "Updated specs to ${{needs.check-release.outputs.latest}}"
+          git commit -m "Updated specs to ${{needs.check-release.outputs.latest}}"
+          git push origin spec-${{needs.check-release.outputs.latest}}
       - name: Create PR
         run: gh pr create -B spec-${{needs.check-release.outputs.latest}} -H main --title 'Updated windows spec' --body 'Created by Github action'
         env:
