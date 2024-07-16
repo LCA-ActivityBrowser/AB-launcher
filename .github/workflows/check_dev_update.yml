@@ -90,6 +90,6 @@ jobs:
           git commit -m "Updated specs to ${{needs.check-release.outputs.latest}}"
           git push origin spec-${{needs.check-release.outputs.latest}}
       - name: Create PR
-        run: gh pr create -B spec-${{needs.check-release.outputs.latest}} -H main --title 'Updated windows spec' --body 'Created by Github action'
+        run: gh pr create --title 'Updated spec to ${{needs.check-release.outputs.latest}}' --body 'Created by Github action'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
