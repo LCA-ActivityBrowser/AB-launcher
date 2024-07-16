@@ -91,12 +91,17 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: win-release-spec
-          path: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          path: ab_releases/dev/windows/
       - name: Fetch MacOS release spec
         uses: actions/download-artifact@master
         with:
           name: mac-release-spec
-          path: ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
+          path: ab_releases/dev/macos/
+      - name: Update current.json
+        run: |
+          JSON_KEY="dev"
+          JSON_VALUE="${{needs.check-release.outputs.latest}}"
+          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/current.json > ab_releases/current.json
       - name: Create commit
         run: |
           git config --global user.name 'github-actions[bot]'
