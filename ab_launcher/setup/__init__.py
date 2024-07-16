@@ -70,6 +70,8 @@ class Setup:
 
 
 def setup():
+    from ab_launcher.launch import launch
+
     setupper = Setup()
     spec_file = setupper.download_env_spec()
 
@@ -80,4 +82,6 @@ def setup():
     setupper.post_install()
 
     setupper.set_config_file()
+
+    launch()
 

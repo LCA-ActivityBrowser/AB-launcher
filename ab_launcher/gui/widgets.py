@@ -22,7 +22,7 @@ class SpecialProgressBar(ttk.Frame):
         self.inner = ttk.Frame(
             self,
             height=10,
-            width=500,
+            width=502,
             style='blue.TFrame'
         )
 
@@ -48,7 +48,7 @@ class SpecialProgressBar(ttk.Frame):
             self.after(1, self.loop)
 
     def set(self, progress: int):
-        x_place = int((progress * 5) - 500)
+        x_place = int((progress * 5) - 501)
         self.inner.place(x=x_place)
 
 
@@ -88,6 +88,8 @@ class SpecialLink(ttk.Label):
         font.configure(underline=True, size=10)
 
         self.configure(cursor="hand2", padding=5, foreground='#0070c0', background='white', font=font)
+
+        self.bind("<ButtonRelease>", self.clicked)
 
     def set_text(self, text: str):
         self.config(text=text)

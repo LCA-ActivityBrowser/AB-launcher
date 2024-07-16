@@ -25,10 +25,12 @@ if not sys.stdout:
 class Manager(threading.Thread):
 
     def run(self):
-        if ab_launcher.SETUP or ab_launcher.UPDATE:
-            do_setup()
-
-        do_launch()
+        if ab_launcher.SETUP:
+            gui.splash.ask("First setup, this may take a while", ("Install now", do_setup))
+        elif ab_launcher.UPDATE:
+            gui.splash.ask("Update available", ("Install now", do_setup), ("Install later", do_launch))
+        else:
+            do_launch()
 
 
 def do_setup():
@@ -39,12 +41,16 @@ def do_setup():
         target=setup
     )
     thread.start()
-    thread.join()
 
 
 def do_launch():
     from ab_launcher.launch import launch
-    launch()
+
+    thread = threading.Thread(
+        name="launch",
+        target=launch
+    )
+    thread.start()
 
 
 if __name__ == "__main__":

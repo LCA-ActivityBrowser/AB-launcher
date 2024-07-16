@@ -71,7 +71,7 @@ class Splash(tk.Tk):
             buttons.add_button(
                 other_option[0],
                 widgets.SpecialLink,
-                callback=functools.partial(answered, option[1])
+                callback=functools.partial(answered, other_option[1])
             )
 
 
