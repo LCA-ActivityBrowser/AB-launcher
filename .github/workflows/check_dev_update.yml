@@ -42,9 +42,19 @@ jobs:
           echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
   build-dev-windows:
-    runs-on: windows-latest
+    runs-on: ${{matrix.os}}
     needs: check-release
     if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - location: ab_releases/dev/windows/win-environment-
+            shorthand: win
+            os: windows-latest
+          - location: ab_releases/dev/macos/mac-environment-
+            shorthand: mac
+            os: macos-latest
     defaults:
       run:
         shell: bash -l {0}
@@ -54,18 +64,18 @@ jobs:
       - name: Install current environment
         uses: mamba-org/setup-micromamba@v1
         with:
-          # environment-file: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.current}}.txt
+          environment-file: ${{matrix.location}}${{needs.check-release.outputs.current}}.txt
           environment-name: environment
           create-args: python=3.11
       - name: Update to latest
         run: |
-          # micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
-          micromamba env export --explicit -n environment >> ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
+          micromamba env export --explicit -n environment >> ${{matrix.location}}${{needs.check-release.outputs.latest}}.txt
       - name: Upload environment as artifact
         uses: actions/upload-artifact@master
         with:
-          name: win-release-spec
-          path: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          name: ${{matrix.shorthand}}-release-spec
+          path: ${{matrix.location}}${{needs.check-release.outputs.latest}}.txt
   create-pull-request:
     runs-on: ubuntu-latest
     needs: [check-release, build-dev-windows]
@@ -82,14 +92,20 @@ jobs:
         with:
           name: win-release-spec
           path: ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+      - name: Fetch MacOS release spec
+        uses: actions/download-artifact@master
+        with:
+          name: mac-release-spec
+          path: ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
       - name: Create commit
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          git add ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
           git commit -m "Updated specs to ${{needs.check-release.outputs.latest}}"
           git push origin spec-${{needs.check-release.outputs.latest}}
       - name: Create PR
-        run: gh pr create --title 'Updated spec to ${{needs.check-release.outputs.latest}}' --body 'Created by Github action'
+        run: gh pr create --title 'Updated specs to ${{needs.check-release.outputs.latest}}' --body 'Created by Github action'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
