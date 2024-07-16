@@ -8,49 +8,107 @@ on:
 jobs:
   check-release:
     runs-on: ubuntu-latest
-
+    outputs:
+      current: ${{ steps.check_repo.outputs.current_version }}
+      latest: ${{ steps.check_anaconda.outputs.latest_version }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Get current version from repo
+        id: check_repo
+        run: |           
+          # Read the local version from version.json
+          CURRENT_VERSION=$(jq -r .dev ab_releases/current.json)
+          echo "Current version: $CURRENT_VERSION"
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
-    - name: Install dependencies
-      run: |
-        python -m pip install requests
+      - name: Get latest version from Anaconda
+        id: check_anaconda
+        run: |
+          # Variables
+          ANACONDA_API_URL="https://api.anaconda.org/package/bsteubing/activity-browser-dev"
+          LABEL="main"
+          
+          # Fetch the package information from Anaconda
+          PACKAGE_INFO=$(curl -s $ANACONDA_API_URL)
 
-    - name: Check latest release version from Anaconda
-      id: check_anaconda
-      run: |
-        #!/usr/bin/env python
-        import requests
-        import json
+          # Extract the latest version for the specified label
+          LATEST_VERSION=$(echo $PACKAGE_INFO | jq -r --arg LABEL "$LABEL" '.files[] | select(.labels[] == $LABEL) | .version' | sort -V | tail -n 1)
+          echo "Latest version: $LATEST_VERSION"
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
-        # Dev api url
-        anaconda_api_url = f"https://api.anaconda.org/package/bsteubing/activity-browser-dev"
-
-        response = requests.get(anaconda_api_url)
-        data = response.json()
-        latest_version = data['latest_version']
-
-        with open('ab_releases/current.json', 'r') as f:
-            local_data = json.load(f)
-
-        local_version = local_data.get("dev")
-
-        if latest_version != local_version:
-            print("::set-output name=new_version::true")
-        else:
-            print("::set-output name=new_version::false")
-
-    - name: Perform action if new version is found
-      if: steps.check_anaconda.outputs.new_version == 'true'
-      run: |
-        echo "New version found, performing actions..."
-        # Add your actions here, for example:
-        # - Send a notification
-        # - Create an issue
-        # - Trigger another workflow
+  build-dev-windows:
+    runs-on: ${{matrix.os}}
+    needs: check-release
+    if: ${{ needs.check-release.outputs.current != needs.check-release.outputs.latest }}
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+        include:
+          - location: ab_releases/dev/windows/win-environment-
+            shorthand: win
+            os: windows-latest
+          - location: ab_releases/dev/macos/mac-environment-
+            shorthand: mac
+            os: macos-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install current environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: ${{matrix.location}}${{needs.check-release.outputs.current}}.txt
+          environment-name: environment
+          create-args: python=3.11
+      - name: Update to latest
+        run: |
+          micromamba install -n environment -c bsteubing -y activity-browser-dev=${{needs.check-release.outputs.latest}}
+          micromamba env export --explicit -n environment >> ${{matrix.location}}${{needs.check-release.outputs.latest}}.txt
+      - name: Upload environment as artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{matrix.shorthand}}-release-spec
+          path: ${{matrix.location}}${{needs.check-release.outputs.latest}}.txt
+  create-pull-request:
+    runs-on: ubuntu-latest
+    needs: [check-release, build-dev-windows]
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Create branch
+        run: git checkout -b spec-${{needs.check-release.outputs.latest}}
+      - name: Fetch Windows release spec
+        uses: actions/download-artifact@master
+        with:
+          name: win-release-spec
+          path: ab_releases/dev/windows/
+      - name: Fetch MacOS release spec
+        uses: actions/download-artifact@master
+        with:
+          name: mac-release-spec
+          path: ab_releases/dev/macos/
+      - name: Update current.json
+        run: |
+          JSON_KEY="dev"
+          JSON_VALUE="${{needs.check-release.outputs.latest}}"
+          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/current.json > tmp.json && mv tmp.json ab_releases/current.json
+      - name: Create commit
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
+          git add ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
+          git add ab_releases/current.json
+          git commit -m "Updated dev specs to ${{needs.check-release.outputs.latest}}"
+          git push origin spec-${{needs.check-release.outputs.latest}}
+      - name: Create PR
+        run: gh pr create --title 'Updated dev specs to ${{needs.check-release.outputs.latest}}' --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
