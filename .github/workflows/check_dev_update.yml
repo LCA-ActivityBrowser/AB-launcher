@@ -75,6 +75,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Create branch
+        run: git checkout -b spec-${{needs.check-release.outputs.latest}}
       - name: Fetch Windows release spec
         uses: actions/download-artifact@master
         with:
