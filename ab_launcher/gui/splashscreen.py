@@ -1,4 +1,5 @@
 import os
+import functools
 
 import tkinter as tk
 from tkinter import ttk
@@ -28,7 +29,7 @@ class Splash(tk.Tk):
         # Create and place the label
         self.label = ttk.Label(self, text="Launcher Version: 0.0.0", background="white")
         self.label.configure(background="white")
-        self.label.place(x=10, y=280, anchor="sw")
+        self.label.place(x=10, y=275, anchor="sw")
 
         # Create and place the progress bar
         self.progress_bar = widgets.SpecialProgressBar(self)
@@ -52,6 +53,28 @@ class Splash(tk.Tk):
     def set_progress(self, progress: float):
         self.progress_bar.looping = False
         self.progress_bar.set(int(progress))
+
+    def ask(self, question: str, option: tuple[str, callable], *args):
+        def answered(callback):
+            buttons.destroy()
+            callback()
+
+        self.notify(question)
+        self.set_progress(100)
+
+        buttons = widgets.ButtonLayout(self)
+        buttons.place(x=495, y=275, anchor='se')
+
+        buttons.add_button(option[0], callback=functools.partial(answered, option[1]))
+
+        for other_option in args:
+            buttons.add_button(
+                other_option[0],
+                widgets.SpecialLink,
+                callback=functools.partial(answered, option[1])
+            )
+
+
 
 
 splash = Splash()
