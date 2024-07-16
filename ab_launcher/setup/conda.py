@@ -13,6 +13,7 @@ def parse_specs(spec_list) -> [conda_misc.MatchSpec]:
     specs = []
 
     for spec in spec_list:
+        spec = spec.strip('#')
         m = conda_misc.url_pat.match(spec)
         url_p, fn = m.group("url_p"), m.group("fn")
         url = conda_misc.join_url(url_p, fn)

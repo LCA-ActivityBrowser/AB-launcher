@@ -19,7 +19,7 @@ jobs:
         id: check_repo
         run: |           
           # Read the local version from version.json
-          CURRENT_VERSION=$(jq -r .dev ab_releases/current.json)
+          CURRENT_VERSION=$(jq -r .dev ab_releases/latest.json)
           echo "Current version: $CURRENT_VERSION"
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
@@ -94,18 +94,18 @@ jobs:
         with:
           name: mac-release-spec
           path: ab_releases/dev/macos/
-      - name: Update current.json
+      - name: Update latest.json
         run: |
           JSON_KEY="dev"
           JSON_VALUE="${{needs.check-release.outputs.latest}}"
-          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/current.json > tmp.json && mv tmp.json ab_releases/current.json
+          jq --arg value "$JSON_VALUE" '.dev = $value' ab_releases/latest.json > tmp.json && mv tmp.json ab_releases/latest.json
       - name: Create commit
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ab_releases/dev/windows/win-environment-${{needs.check-release.outputs.latest}}.txt
           git add ab_releases/dev/macos/mac-environment-${{needs.check-release.outputs.latest}}.txt
-          git add ab_releases/current.json
+          git add ab_releases/latest.json
           git commit -m "Updated dev specs to ${{needs.check-release.outputs.latest}}"
           git push origin spec-${{needs.check-release.outputs.latest}}
       - name: Create PR

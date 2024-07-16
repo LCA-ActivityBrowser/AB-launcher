@@ -25,7 +25,7 @@ if not sys.stdout:
 class Manager(threading.Thread):
 
     def run(self):
-        if ab_launcher.SETUP:
+        if ab_launcher.SETUP or ab_launcher.UPDATE:
             do_setup()
 
         do_launch()
@@ -53,6 +53,7 @@ if __name__ == "__main__":
 
     gui.splash.mainloop()
 
+    # if we're on MacOS we will run AB in the main thread, this will make it take over the app icon that we've built for
     if sys.platform == "darwin":
         from activity_browser import run_activity_browser
         run_activity_browser()
