@@ -14,7 +14,7 @@ class Splash(tk.Tk):
 
         # Set window properties
         self.overrideredirect(True)
-        self.configure(background="white")
+        self.configure(background="white", highlightcolor="lightgrey", highlightthickness=3)
 
         style = ttk.Style(self)
         style.theme_use('classic')
@@ -33,7 +33,7 @@ class Splash(tk.Tk):
 
         # Create and place the progress bar
         self.progress_bar = widgets.SpecialProgressBar(self)
-        self.progress_bar.place(x=0, y=293, anchor="sw")
+        self.progress_bar.place(x=-3, y=293, anchor="sw")
 
         # Center the window in the active screen
         x, y = utils.get_active_screen_center()
@@ -75,6 +75,7 @@ class Splash(tk.Tk):
             )
 
 
-
-
 splash = Splash()
+
+if __name__ == "__main__":
+    splash.mainloop()
