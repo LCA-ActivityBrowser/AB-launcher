@@ -1,26 +1,9 @@
-import subprocess
 import threading
-import sys
 import os
-import io
+import sys
 
 import ab_launcher
 import ab_launcher.gui.splashscreen as gui
-
-# set conda environmental variables
-os.environ["CONDA_PREFIX"] = ab_launcher.paths.ENV_DIR
-os.environ["CONDA_PKGS_DIRS"] = ab_launcher.paths.PKGS_DIR
-os.environ["CONDA_REGISTER_ENVS"] = "false"
-os.environ["CONDA_EXE"] = ""
-os.environ["CONDA_PYTHON_EXE"] = ""
-os.environ["CONDA_DEFAULT_ENV"] = ""
-os.environ["CONDA_ROOT"] = ""
-
-# stdio fallbacks when built without terminal
-if not sys.stdout:
-    sys.stdout = io.StringIO()
-    sys.stdin = io.StringIO()
-    sys.stderr = io.StringIO()
 
 
 class Manager(threading.Thread):
@@ -55,6 +38,17 @@ def do_launch():
 
 
 if __name__ == "__main__":
+    # divert the console subprocess to the right functionality
+    if "--abconsole" in sys.argv:
+        from ab_launcher.console import console_subprocess
+        console_subprocess()
+        exit()
+
+    # run with a console if requested through the arguments
+    if "-c" in sys.argv or "--console" in sys.argv or os.environ.get("AB_CONSOLE", False):
+        from ab_launcher.console import start_console
+        console_subprocess = start_console()  # save subprocess from being garbage collected
+
     manager = Manager()
     manager.start()
 

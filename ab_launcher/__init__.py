@@ -1,6 +1,16 @@
 import os
+import sys
 
-from ab_launcher import paths
+from ab_launcher import paths, io
+
+# set conda environmental variables
+os.environ["CONDA_PREFIX"] = paths.ENV_DIR
+os.environ["CONDA_PKGS_DIRS"] = paths.PKGS_DIR
+os.environ["CONDA_REGISTER_ENVS"] = "false"
+os.environ["CONDA_EXE"] = ""
+os.environ["CONDA_PYTHON_EXE"] = ""
+os.environ["CONDA_DEFAULT_ENV"] = ""
+os.environ["CONDA_ROOT"] = ""
 
 
 def update_check():
@@ -29,4 +39,8 @@ def update_check():
 
 SETUP = not os.path.isfile(os.path.join(paths.AB_DIR, "config"))
 UPDATE = update_check()
+
+
+sys.stdout = io.MultiIO([sys.stdout])
+sys.stderr = io.MultiIO([sys.stderr])
 

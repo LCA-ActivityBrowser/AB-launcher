@@ -12,19 +12,24 @@ def windows_launch():
     splash.notify("Loading packages")
     splash.undefined_progress()
 
+    # find the python file we will start the subprocess on
+    # it's either in the assets folder (when built to an .exe)
     if os.path.isfile(os.path.join(paths.LOCAL, "assets", "windows.py")):
         runner = os.path.join(paths.LOCAL, "assets", "windows.py")
+    # or we can just take the one right here (maybe also works when built to exe)
     else:
         runner = windows.__file__
 
+    # open a subprocess, combine stdout and stderr, and make sure to create no window
     launcher = subprocess.Popen(
         [paths.ENV_PY_DIR, runner],
         stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
         creationflags=subprocess.CREATE_NO_WINDOW,
     )
 
-    stream = ""
+    # different stages we encounter throughout the loading process
     anchors = ["Loading numpy",
                "Loading pandas",
                "Loading PySide2",
@@ -35,21 +40,21 @@ def windows_launch():
                "Done"
                ]
 
+    # while there are anchors iterate over them to show progress
     while anchors:
-        char = launcher.stdout.read(1)
-        if sys.stdout:
-            sys.stdout.write(char)
-        stream += char
-        if anchors and anchors[0] in stream:
+        line = launcher.stdout.readline()
+        if anchors and anchors[0] in line:
             splash.notify(anchors.pop(0), False)
-            stream = ""
+        sys.stdout.write(line)
 
-    if sys.stdout:
-        sys.stdout.write("\n")
-
+    # if all anchors are gone, it means loading is done and we can destroy the splashscreen
     splash.after(2000, splash.destroy)
 
-    launcher.wait()
+    # keep redirecting the stdout/err of the subprocess to our stdout to make them show up in the debug window
+    # and our own console
+    while launcher.poll() is None:
+        line = launcher.stdout.readline()
+        sys.stdout.write(line)
 
 
 if sys.platform == "darwin":
