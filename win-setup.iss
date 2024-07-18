@@ -30,8 +30,8 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 PrivilegesRequired=lowest
-; PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename="Install Activity Browser"
+PrivilegesRequiredOverridesAllowed=dialog
+OutputBaseFilename="Activity_Browser_Install_Win_x64"
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

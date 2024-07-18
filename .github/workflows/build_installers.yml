@@ -26,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: windows-installer
-          path: dist/Install Activity Browser.exe
+          path: dist/Activity_Browser_Install_Win_x64

@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: windows-installer
-          path: dist/Install Activity Browser.exe
+          path: dist/Activity_Browser_Install_Win_x64.exe
   release:
     needs: build_windows
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
           body: Release test
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: windows-installer/Install Activity Browser.exe
+          artifacts: windows-installer/Activity_Browser_Install_Win_x64.exe
