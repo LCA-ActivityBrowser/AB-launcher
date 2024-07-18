@@ -48,7 +48,7 @@ jobs:
           mv "dist/Activity Browser" "dist/Activity Browser.app"
           create-dmg \
             --volname "Activity Browser Installer" \
-            --volicon "ab_launcher\assets\activity-browser.icns" \
+            --volicon "ab_launcher/assets/activity-browser.icns" \
             --window-pos 200 120 \
             --window-size 800 400 \
             --icon-size 100 \
