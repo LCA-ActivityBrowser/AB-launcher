@@ -27,3 +27,38 @@ jobs:
         with:
           name: windows-installer
           path: dist/Activity_Browser_Install_Win_x64
+  build_macos:
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: build
+          environment-file: .github/environments/build-macos.yml
+      - name: Build executable
+        run: pyinstaller macos.spec
+      - name: Rename .app package
+        run: |
+          brew install create-dmg
+          mv "dist/Activity Browser" "dist/Activity Browser.app"
+          create-dmg \
+            --volname "Activity Browser Installer" \
+            --volicon "ab_launcher\assets\activity-browser.icns" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "Activity Browser.app" 200 190 \
+            --hide-extension "Activity Browser.app" \
+            --app-drop-link 600 185 \
+            "Activity_Browser_Install_Mac_x64.dmg" \
+            "dist/"
+      - name: Upload installer as artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: macos-installer
+          path: Activity_Browser_Install_Mac_x64.dmg
