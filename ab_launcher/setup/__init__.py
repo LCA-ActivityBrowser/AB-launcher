@@ -29,7 +29,7 @@ class Setup:
         if sys.platform == "win32":
             env_spec_url = base_url + "dev/windows/win-environment-" + self.latest + ".txt"
         elif sys.platform == "darwin":
-            env_spec_url = base_url + "dev/macos/macos-environment-" + self.latest + ".txt"
+            env_spec_url = base_url + "dev/macos/mac-environment-" + self.latest + ".txt"
         else:
             raise OSError
         path, _ = urllib.request.urlretrieve(env_spec_url)
@@ -77,7 +77,7 @@ def setup():
 
     specs = setupper.parse_env_spec(spec_file)
 
-    explicit_updater(specs, splash)
+    explicit_updater(specs, Splash())
 
     setupper.post_install()
 
