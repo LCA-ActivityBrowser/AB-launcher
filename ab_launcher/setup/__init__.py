@@ -38,7 +38,7 @@ class Setup:
 
     def set_config_file(self):
         # create installed file as a flag that installation was successful
-        with open(os.path.join(paths.AB_DIR, "config"), "w") as file:
+        with open(os.path.join(paths.ROOT, "config"), "w") as file:
             data = {
                 "launcher": {
                     "launcher_version": "0.0.0",

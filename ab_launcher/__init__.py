@@ -20,7 +20,7 @@ def update_check():
     if SETUP:
         return False
 
-    with open(os.path.join(paths.AB_DIR, "config"), 'r') as file:
+    with open(os.path.join(paths.ROOT, "config"), 'r') as file:
         config = json.load(file)
 
     current = config["launcher"]["ab_version"]
@@ -37,7 +37,7 @@ def update_check():
     return not current == latest
 
 
-SETUP = not os.path.isfile(os.path.join(paths.AB_DIR, "config"))
+SETUP = not os.path.isfile(os.path.join(paths.ROOT, "config"))
 UPDATE = update_check()
 
 
