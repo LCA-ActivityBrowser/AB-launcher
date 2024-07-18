@@ -43,11 +43,11 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: windows-installer
-          path: Install Activity Browser.exe
+          path: windows-installer
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
           body: Release test
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: Install Activity Browser.exe
+          artifacts: windows-installer/Install Activity Browser.exe
