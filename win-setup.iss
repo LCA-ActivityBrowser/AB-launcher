@@ -18,7 +18,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\pylca\{#MyAppName}
 ; "ArchitecturesAllowed=x64compatible" specifies that Setup cannot run
 ; on anything but x64 and Windows 11 on Arm.
 ArchitecturesAllowed=x64compatible
@@ -29,12 +29,14 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
-OutputBaseFilename=mysetup
+PrivilegesRequired=lowest
+; PrivilegesRequiredOverridesAllowed=dialog
+OutputBaseFilename="Install Activity Browser"
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=.\ab_launcher\assets\activity-browser.ico
+OutputDir=dist
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -43,8 +45,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\marin\PycharmProjects\AB-launcher\dist\Activity Browser\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\marin\PycharmProjects\AB-launcher\dist\Activity Browser\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: ".\dist\Activity Browser\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\dist\Activity Browser\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
