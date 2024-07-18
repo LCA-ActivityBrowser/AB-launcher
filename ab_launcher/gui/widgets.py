@@ -114,9 +114,9 @@ class ButtonLayout(ttk.Frame):
 
 
 if __name__ == "__main__":
-    from ab_launcher.gui.splashscreen import splash
+    from ab_launcher.gui.splashscreen import Splash
 
-    splash.ask("Update available", ("Update now", None), ("Update later", None))
+    Splash().ask("Update available", ("Update now", None), ("Update later", None))
 
-    splash.mainloop()
+    Splash().mainloop()
 

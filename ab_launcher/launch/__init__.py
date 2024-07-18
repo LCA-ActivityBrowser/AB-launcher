@@ -3,14 +3,14 @@ import subprocess
 import os
 
 from ab_launcher import paths
-from ab_launcher.gui.splashscreen import splash
+from ab_launcher.gui.splashscreen import Splash
 from ab_launcher.launch import windows
 from ab_launcher.launch import macos
 
 
 def windows_launch():
-    splash.notify("Loading packages")
-    splash.undefined_progress()
+    Splash().notify("Loading packages")
+    Splash().undefined_progress()
 
     # find the python file we will start the subprocess on
     # it's either in the assets folder (when built to an .exe)
@@ -44,11 +44,11 @@ def windows_launch():
     while anchors:
         line = launcher.stdout.readline()
         if anchors and anchors[0] in line:
-            splash.notify(anchors.pop(0), False)
+            Splash().notify(anchors.pop(0), False)
         sys.stdout.write(line)
 
     # if all anchors are gone, it means loading is done and we can destroy the splashscreen
-    splash.after(2000, splash.destroy)
+    Splash().after(2000, Splash().destroy)
 
     # keep redirecting the stdout/err of the subprocess to our stdout to make them show up in the debug window
     # and our own console

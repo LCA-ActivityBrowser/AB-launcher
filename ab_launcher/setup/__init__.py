@@ -5,7 +5,7 @@ import urllib.request
 import json
 
 from ab_launcher import paths
-from ab_launcher.gui.splashscreen import splash
+from ab_launcher.gui.splashscreen import Splash
 from ab_launcher.setup.conda import explicit_updater
 
 
@@ -13,8 +13,8 @@ class Setup:
     latest = None
 
     def download_env_spec(self):
-        splash.undefined_progress()
-        splash.notify("Downloading environment specification...")
+        Splash().undefined_progress()
+        Splash().notify("Downloading environment specification...")
 
         base_url = "https://raw.githubusercontent.com/mrvisscher/AB-launcher/main/ab_releases/"
 

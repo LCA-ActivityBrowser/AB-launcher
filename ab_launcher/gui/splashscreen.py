@@ -8,7 +8,20 @@ from ab_launcher import paths
 from ab_launcher.gui import utils, widgets
 
 
-class Splash(tk.Tk):
+class SingletonMeta(type):
+    """
+    A metaclass that creates a Singleton base class when called.
+    """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class Splash(tk.Tk, metaclass=SingletonMeta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -74,8 +87,3 @@ class Splash(tk.Tk):
                 callback=functools.partial(answered, other_option[1])
             )
 
-
-splash = Splash()
-
-if __name__ == "__main__":
-    splash.mainloop()
