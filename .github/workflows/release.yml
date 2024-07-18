@@ -1,4 +1,4 @@
-name: launcher release
+name: Launcher Release
 on:
   workflow_dispatch: # Allows manual triggering
   push:
@@ -30,6 +30,7 @@ jobs:
           name: windows-installer
           path: dist/Install Activity Browser.exe
   release:
+    needs: build_windows
     runs-on: ubuntu-latest
     defaults:
       run:
