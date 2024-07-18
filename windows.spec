@@ -1,5 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+block_cipher = None
+
 data_list = [
     ('./ab_launcher/launch/windows.py', './ab_launcher/assets/'),
     ('./ab_launcher/assets/activity-browser.ico', './ab_launcher/assets/'),
@@ -17,9 +19,12 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
     noarchive=False,
 )
-pyz = PYZ(a.pure)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
@@ -27,6 +32,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
+    exclude_binaries=True,
     name='Activity Browser',
     debug=False,
     bootloader_ignore_signals=False,
@@ -42,5 +48,13 @@ exe = EXE(
     entitlements_file=None,
     icon=['ab_launcher\\assets\\activity-browser.ico'],
 )
-
-
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    name='Activity Browser',
+)
