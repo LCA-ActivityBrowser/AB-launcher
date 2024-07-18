@@ -1,0 +1,50 @@
+name: launcher release
+on:
+  workflow_dispatch: # Allows manual triggering
+  push:
+    tags:
+      - '*'
+jobs:
+  build_windows:
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-name: build
+          environment-file: .github/environments/build-windows.yml
+      - name: Build executable
+        run: pyinstaller windows.spec
+      - name: Compile Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: win-setup.iss
+      - name: Upload installer as artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: windows-installer
+          path: dist/Install Activity Browser.exe
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch Windows build
+        uses: actions/download-artifact@master
+        with:
+          name: windows-installer
+          path: Install Activity Browser.exe
+      - name: Create github release
+        uses: ncipollo/release-action@v1
+        with:
+          body: Release test
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: Install Activity Browser.exe
