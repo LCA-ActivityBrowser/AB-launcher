@@ -22,6 +22,9 @@ def setup_urllib():
     opener = urllib.request.build_opener(https_handler)
     urllib.request.install_opener(opener)
 
+
+setup_urllib()
+
 def update_check():
     import json
     import urllib.request
@@ -52,5 +55,3 @@ UPDATE = update_check()
 
 sys.stdout = io.MultiIO([sys.stdout])
 sys.stderr = io.MultiIO([sys.stderr])
-
-setup_urllib()
