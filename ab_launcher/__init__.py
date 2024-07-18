@@ -1,5 +1,9 @@
 import os
 import sys
+import urllib.request
+
+import certifi
+import ssl
 
 from ab_launcher import paths, io
 
@@ -12,6 +16,11 @@ os.environ["CONDA_PYTHON_EXE"] = ""
 os.environ["CONDA_DEFAULT_ENV"] = ""
 os.environ["CONDA_ROOT"] = ""
 
+def setup_urllib():
+    context = ssl.create_default_context(cafile=certifi.where())
+    https_handler = urllib.request.HTTPSHandler(context=context)
+    opener = urllib.request.build_opener(https_handler)
+    urllib.request.install_opener(opener)
 
 def update_check():
     import json
@@ -44,3 +53,4 @@ UPDATE = update_check()
 sys.stdout = io.MultiIO([sys.stdout])
 sys.stderr = io.MultiIO([sys.stderr])
 
+setup_urllib()
