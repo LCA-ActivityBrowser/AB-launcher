@@ -33,7 +33,7 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,14 +43,14 @@ jobs:
           environment-name: build
           environment-file: .github/environments/build-macos.yml
       - name: Build executable
-        run: pyinstaller macos.spec
+        run: pyinstaller macos.spec -y
       - name: Rename .app package
         run: |
           brew install create-dmg
           mv "dist/Activity Browser" "dist/Activity Browser.app"
           create-dmg \
             --volname "Activity Browser Installer" \
-            --volicon "ab_launcher\assets\activity-browser.icns" \
+            --volicon "ab_launcher/assets/activity-browser.icns" \
             --window-pos 200 120 \
             --window-size 800 400 \
             --icon-size 100 \
@@ -65,7 +65,7 @@ jobs:
           name: macos-installer
           path: Activity_Browser_Install_Mac_x64.dmg
   release:
-    needs: build_windows
+    needs: [build_windows, build_macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -79,10 +79,14 @@ jobs:
         with:
           name: windows-installer
           path: windows-installer
+      - name: Fetch MacOS build
+        uses: actions/download-artifact@master
+        with:
+          name: macos-installer
+          path: macos-installer
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
-          body: Release test
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: windows-installer/Activity_Browser_Install_Win_x64.exe
+          artifacts: "windows-installer/Activity_Browser_Install_Win_x64.exe, macos-installer/Activity_Browser_Install_Mac_x64.dmg"
