@@ -41,7 +41,7 @@ jobs:
           environment-name: build
           environment-file: .github/environments/build-macos.yml
       - name: Build executable
-        run: pyinstaller macos.spec
+        run: pyinstaller macos.spec -y
       - name: Rename .app package
         run: |
           brew install create-dmg
