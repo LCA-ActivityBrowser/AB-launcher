@@ -49,3 +49,4 @@ jobs:
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: Install Activity Browser.exe
+          commit: main
